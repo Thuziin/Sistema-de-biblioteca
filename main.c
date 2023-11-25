@@ -221,6 +221,42 @@ void adicionar_autor(No_Autor **lista, char nome[100], char instituicao[100]){  
     }
 }
 
+No_Autor *remover_autor(No_Autor **lista, char nome[]){
+
+    No_Autor *aux = *lista;
+    No_Autor *remover = NULL;
+
+    if(*lista == NULL){
+        printf("Nao ha autor neste livro!\n");
+        return remover;
+    }else{
+
+        if(strcmp(aux->autor.nome, nome) == 0){  //conferir o primeiro elemento da lista
+
+            remover = aux;  // o ponteiro remover recebe o primeiro elemento
+            *lista = aux->proximo;  // agora o primeiro elemento da lista sera o proximo da lista
+            return remover;
+
+        }else{ // se nao for o primeiro elemento
+        
+        while(aux->proximo && (strcmp(nome, aux->proximo->autor.nome) != 0)){ // avança enquanto aux->proximo for diferente de NULL ou quando for diferente do nome, assim teremos o elemento anterior do que queremos deletar
+            aux = aux->proximo;
+        }
+
+        if(aux->proximo == NULL) // se for NULL quer dizer que nao encontrou o autor na lista de autores
+        {
+            printf("Autor nao encontrado\n");
+            return remover;
+        }else{
+            remover = aux->proximo;
+            aux->proximo = remover->proximo; // ou aux->proximo->proximo
+            return remover;
+        }
+        }
+    }
+
+}
+
 
 // função para adicionar livro
 
@@ -379,14 +415,24 @@ void adicionar_mais_um_autor_no_livro(No_Livro **lista){
     if(aux==NULL){
         printf("Identificador nao achado!");
     }else{
-        printf("Digite o nome do autor: ");
-        char autor[MAX_CARACTERE_STR];
-        gets(autor);
-        printf("Digite o nome da instituicao autor: ");
-        char instituicao[MAX_CARACTERE_STR];
-        gets(instituicao);
-        adicionar_autor(&(aux->livro.lista_autores), autor, instituicao);
-        printf("Adicionado com sucesso!");
+
+            printf("\t\t------------------------------------------- Livro com autor que sera adicionado --------------------------------------------------\n\n");
+            printf("\t\tIdentificador: %d\n", aux->livro.identificador);
+            printf("\t\tTitulo: %s\n", aux->livro.titulo);
+            printf("\t\t");
+            imprimir_autores(&(aux->livro.lista_autores));
+            printf("\t\tAno: %d\n", aux->livro.ano);
+            printf("\t\tEdicao: %d\n", aux->livro.edicao);
+            printf("\t\tEditora: %s\n",aux->livro.editora);
+            printf("\t\t-----------------------------------------------------------------------------------------------------------------------------------\n\n");
+
+            printf("Digite o nome do autor: ");
+            char autor[MAX_CARACTERE_STR];
+            gets(autor);
+            printf("Digite o nome da instituicao autor: ");
+            char instituicao[MAX_CARACTERE_STR];
+            gets(instituicao);
+            adicionar_autor(&(aux->livro.lista_autores), autor, instituicao);
 
             printf("\t\t--------------------------------------------------- Adicionado com sucesso! -----------------------------------------------------\n\n");
             printf("\t\tIdentificador: %d\n", aux->livro.identificador);
@@ -398,6 +444,55 @@ void adicionar_mais_um_autor_no_livro(No_Livro **lista){
             printf("\t\tEditora: %s\n",aux->livro.editora);
             printf("\t\t-----------------------------------------------------------------------------------------------------------------------------------\n\n");
     }
+}
+
+void remover_um_autor_no_livro(No_Livro **lista){
+
+    int identificacao_livro;
+    printf("Qual a identificacao do livro em que vc queira remover um autor: ");
+    scanf("%d", &identificacao_livro);
+    getchar();
+
+    /*Buscar o livro*/
+    No_Livro *aux = *lista;
+
+    No_Autor *remover; // ponteiro para recebermos o elemento que iremos remover
+
+    while(aux && aux->livro.identificador != identificacao_livro){ // enquanto aux nao é NULL e aux nao possui identificador: avance um elemento
+        aux = aux->proximo;
+    }
+    if(aux==NULL){
+        printf("Identificador nao achado!");
+    }else{
+
+            printf("\t\t------------------------------------------- Livro com autor que sera removido --------------------------------------------------\n\n");
+            printf("\t\tIdentificador: %d\n", aux->livro.identificador);
+            printf("\t\tTitulo: %s\n", aux->livro.titulo);
+            printf("\t\t");
+            imprimir_autores(&(aux->livro.lista_autores));
+            printf("\t\tAno: %d\n", aux->livro.ano);
+            printf("\t\tEdicao: %d\n", aux->livro.edicao);
+            printf("\t\tEditora: %s\n",aux->livro.editora);
+            printf("\t\t-----------------------------------------------------------------------------------------------------------------------------------\n\n");
+        
+
+            printf("Digite o nome do autor que queira deletar: ");
+            char autor[MAX_CARACTERE_STR];
+            gets(autor);
+            remover = remover_autor(&(aux->livro.lista_autores), autor);
+            free(remover);
+
+            printf("\t\t--------------------------------------------------- Removido com sucesso! -----------------------------------------------------\n\n");
+            printf("\t\tIdentificador: %d\n", aux->livro.identificador);
+            printf("\t\tTitulo: %s\n", aux->livro.titulo);
+            printf("\t\t");
+            imprimir_autores(&(aux->livro.lista_autores));
+            printf("\t\tAno: %d\n", aux->livro.ano);
+            printf("\t\tEdicao: %d\n", aux->livro.edicao);
+            printf("\t\tEditora: %s\n",aux->livro.editora);
+            printf("\t\t-----------------------------------------------------------------------------------------------------------------------------------\n\n");
+    }
+
 }
 
 
@@ -417,18 +512,21 @@ int main () {
 
     alterar_usuario(&lista_usuarios);
 
-    
+    */
 
+   adicionar_livro(&lista_livros);
    adicionar_livro(&lista_livros);
 
    adicionar_mais_um_autor_no_livro(&lista_livros);
 
-   adicionar_livro(&lista_livros);
+   remover_um_autor_no_livro(&lista_livros);
    imprimir_livros(lista_livros);
 
-   */
+   
 
 
 
     return 0;
 }
+ /*A FAZER: remover usuarios, remover livros, adicionar reserva, alterar reserva, remover resevar. Atentar que, nao e obrigatorio, mas poder fazer uma
+ função que quando deleta um usuario ou livro, a reserva que esteja com o elemento deletado tambem seja deletado! */
