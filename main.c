@@ -181,8 +181,12 @@ void alterar_usuario(No_Usuario **lista){
         fgets(aux->usuario.endereco, sizeof(aux->usuario.endereco), stdin);
         aux->usuario.endereco[strcspn(aux->usuario.endereco, "\n")] = '\0'; // Remover o caractere de nova linha
 
+        /* retirei essa parte, pois se for para modificar o ID, é melhor adicionar o usuarui
+
         printf("Qual o identificador do novo usuario (XXXXX): ");
         scanf("%d", &aux->usuario.identificador);
+
+        */
 
         printf("Qual o telefone do novo usuario: ");
         scanf("%ld", &aux->usuario.telefone);
@@ -236,9 +240,6 @@ void remover_usuario(No_Usuario **lista){
     free(remover);
     
 }
-
-
-
 
 
 
@@ -560,7 +561,6 @@ void remover_um_autor_no_livro(No_Livro **lista){
 
 }
 
-
 void remover_memoria_lista_autores(No_Autor **lista){
     No_Autor *aux = *lista;
     while(aux){
@@ -620,6 +620,101 @@ void remover_livro(No_Livro **lista){
 
 }
 
+void alterar_livro(No_Livro **lista){
+
+    imprimir_livros(*lista);
+
+    int identificador_livro;
+    printf("Digite o identificador do livro que queira alterar: ");
+    scanf("%d", &identificador_livro);
+    getchar();
+
+    /*Buscar usuario*/
+
+    No_Livro *aux = *lista;
+    while(aux && aux->livro.identificador != identificador_livro){ // se aux nao for nulo e for diferente do identificador, vá para o proximo elemenyp
+        aux = aux->proximo;
+    }
+
+    if(aux == NULL){ // se for NULL, significa que nao existe o identificador dentro da lista de usuarios
+        printf("Nao existe este identificador!\n");
+        return;
+    }else{
+        
+            printf("\t\t------------------------------------------------ Livro escolhido para modificar -------------------------------------------------\n\n");
+            printf("\t\tIdentificador: %d\n", aux->livro.identificador);
+            printf("\t\tTitulo: %s\n", aux->livro.titulo);
+            printf("\t\t");
+            imprimir_autores(&(aux->livro.lista_autores));
+            printf("\t\tAno: %d\n", aux->livro.ano);
+            printf("\t\tEdicao: %d\n", aux->livro.edicao);
+            printf("\t\tEditora: %s\n",aux->livro.editora);
+            printf("\t\t-----------------------------------------------------------------------------------------------------------------------------------\n\n");
+    }
+
+    /*Inserir dados para alterar usuario*/
+
+            printf("Insira os dados para alteracao:\n");
+
+            printf("Qual o titulo do livro: ");
+            fgets(aux->livro.titulo, sizeof(aux->livro.titulo), stdin);
+            aux->livro.titulo[strcspn(aux->livro.titulo, "\n")] = '\0'; // Remover o caractere de nova linha
+
+            printf("Qual o ano do livro: ");
+            scanf("%d", &aux->livro.ano);
+
+            printf("Qual a edicao do livro: ");
+            scanf("%d", &aux->livro.edicao);
+
+            getchar();
+
+            printf("Qual a editora do livro: ");
+            fgets(aux->livro.editora, sizeof(aux->livro.editora), stdin);
+            aux->livro.editora[strcspn(aux->livro.editora, "\n")] = '\0'; // Remover o caractere de nova linha
+
+            int quant_autores;
+
+            remover_memoria_lista_autores(&(aux->livro.lista_autores)); // como vamos cadastrar os autores denovo, devemos liberar a lista de autores
+            aux->livro.lista_autores = NULL;
+
+            printf("Quantos autores: ");
+
+            scanf("%d", &quant_autores);
+
+            getchar();
+
+            for(int i = 0; i < quant_autores; i++){
+
+                char autor[100], instituicao[100];
+
+                printf("Autor %d\n", i+1);
+
+                printf("Digite o nome do autor: ");
+                gets(autor);
+
+
+                printf("Digite a instituicao do autor: ");
+                gets(instituicao);
+
+
+                adicionar_autor(&(aux->livro.lista_autores), autor, instituicao); // vai adicionando na lista de autores (lista encadeada)
+
+            }
+
+            printf("\t\t------------------------------------------------ Livro Modificado! -------------------------------------------------\n\n");
+            printf("\t\tIdentificador: %d\n", aux->livro.identificador);
+            printf("\t\tTitulo: %s\n", aux->livro.titulo);
+            printf("\t\t");
+            imprimir_autores(&(aux->livro.lista_autores));
+            printf("\t\tAno: %d\n", aux->livro.ano);
+            printf("\t\tEdicao: %d\n", aux->livro.edicao);
+            printf("\t\tEditora: %s\n",aux->livro.editora);
+            printf("\t\t-----------------------------------------------------------------------------------------------------------------------------------\n\n");
+
+             imprimir_livros(*lista);
+
+}
+
 int main () {
 
     /* Declarações para inicar a lista, isto é, a lista começarão apontando para NULL, pois ainda nao existe elementos nas listas */
@@ -648,6 +743,7 @@ int main () {
  //  adicionar_mais_um_autor_no_livro(&lista_livros);
 
  //  remover_um_autor_no_livro(&lista_livros);
+ alterar_livro(&lista_livros);
  remover_livro(&lista_livros);
    imprimir_livros(lista_livros);
 
@@ -659,5 +755,7 @@ int main () {
 
     return 0;
 }
- /*A FAZER: alterar livros, adicionar reserva, alterar reserva, remover resevar. Atentar que, nao e obrigatorio, mas poder fazer uma
+ /*
+ 
+ !!!!!!!!!!!!A FAZER: adicionar reserva, alterar reserva, remover resevar. Atentar que, nao e obrigatorio, mas poder fazer uma
  função que quando deleta um usuario ou livro, a reserva que esteja com o elemento deletado tambem seja deletado! E tambem fazer uma função para liberar memoria de todas as listas*/
