@@ -87,6 +87,8 @@ void adicionar_usuario(No_Usuario **lista){
     
     No_Usuario *novo = malloc(sizeof(No_Usuario));
 
+    No_Usuario *aux;
+
     if(novo){ // se houver sucesso na alocação de memoria
 
 
@@ -103,6 +105,18 @@ void adicionar_usuario(No_Usuario **lista){
         printf("Qual o identificador do novo usuario (XXXXX): ");
         scanf("%d", &novo->usuario.identificador);
 
+        /*Conferir se nao existe outro usuario com o mesmo identificador na lista*/
+        aux = *lista;
+        while (aux && aux->usuario.identificador != novo->usuario.identificador)
+        {
+            aux = aux->proximo;
+        }
+        if(aux!=NULL){
+            printf("\n\t\tERRO! Usuario com o mesmo identificador ja cadastrado! Nao podem existir o mesmo identificador para duas pessoas!\n");
+            return;
+        }
+        
+
         printf("Qual o telefone do novo usuario: ");
         scanf("%ld", &novo->usuario.telefone);
 
@@ -115,7 +129,7 @@ void adicionar_usuario(No_Usuario **lista){
             *lista = novo;
          }else{ // se falso, vamos pecorrer a lista ate chegar no ultimo, lembrando que o ultimo sera oque aponta para NULL
 
-         No_Usuario *aux = *lista;
+         aux = *lista;
 
          while(aux->proximo != NULL){
             aux = aux->proximo; // pecorrendo a lista
@@ -181,7 +195,47 @@ void alterar_usuario(No_Usuario **lista){
 
 }
 
+void remover_usuario(No_Usuario **lista){
 
+    imprimir_usuarios(*lista);
+
+    int identificacao_usuario;
+    printf("Qual a identificacao do usuario em que vc queira remover: ");
+    scanf("%d", &identificacao_usuario);
+    getchar();
+    
+
+    No_Usuario *aux = *lista;
+    No_Usuario *remover = NULL;
+
+    if(aux->usuario.identificador==identificacao_usuario){ // conferir se e o primeiro elemento
+        remover = aux;
+        *lista = aux->proximo; // ou remover->proximo
+    }else{ // conferir os elementos adiante
+
+        while (aux->proximo && aux->proximo->usuario.identificador != identificacao_usuario) // enquanto o proximo nao for NULL e diferente do identificador avance
+        {
+            aux = aux->proximo;
+        }
+
+        if(aux->proximo == NULL){
+            printf("ERRO! Nao existe usuario com este identiicador!\n");
+            return;
+        }else{
+
+            remover = aux->proximo;
+            aux->proximo = remover->proximo; // ou aux->proximo->proximo
+
+            printf("\t\t--------------------------------------------------- Removido com sucesso! -----------------------------------------------------\n\n");
+            printf("\t\t ( Nome: %15s | Endereco: %30s | Telefone: %11ld | Identificador: %5d )\n\n", remover->usuario.nome, remover->usuario.endereco, remover->usuario.telefone, remover->usuario.identificador);
+            printf("\t\t-----------------------------------------------------------------------------------------------------------------------------------\n\n");
+        }
+        
+    }
+
+    free(remover);
+    
+}
 
 
 
@@ -273,6 +327,17 @@ void adicionar_livro(No_Livro **lista){
             scanf("%d", &novo->livro.identificador);
 
             getchar();
+
+            /*Conferir se nao existe outro usuario com o mesmo identificador na lista*/
+            aux = *lista;
+            while (aux && aux->livro.identificador != novo->livro.identificador)
+            {
+                aux = aux->proximo;
+            }
+            if(aux!=NULL){
+                printf("\n\t\tERRO! Usuario com o mesmo identificador ja cadastrado! Nao podem existir o mesmo identificador para duas pessoas!\n");
+                return;
+            }
 
             printf("Qual o titulo do livro: ");
             fgets(novo->livro.titulo, sizeof(novo->livro.titulo), stdin);
@@ -474,7 +539,7 @@ void remover_um_autor_no_livro(No_Livro **lista){
             printf("\t\tEdicao: %d\n", aux->livro.edicao);
             printf("\t\tEditora: %s\n",aux->livro.editora);
             printf("\t\t-----------------------------------------------------------------------------------------------------------------------------------\n\n");
-        
+
 
             printf("Digite o nome do autor que queira deletar: ");
             char autor[MAX_CARACTERE_STR];
@@ -496,6 +561,65 @@ void remover_um_autor_no_livro(No_Livro **lista){
 }
 
 
+void remover_memoria_lista_autores(No_Autor **lista){
+    No_Autor *aux = *lista;
+    while(aux){
+        *lista = (*lista)->proximo;
+        free(aux);
+        aux = *lista;
+    }
+}
+
+void remover_livro(No_Livro **lista){
+
+    imprimir_livros(*lista);
+
+    int identificacao_livro;
+    printf("Qual a identificacao do livro em que vc queira remover: ");
+    scanf("%d", &identificacao_livro);
+    getchar();
+
+    No_Livro *aux = *lista;
+    No_Livro *remover = NULL;
+
+    if(aux->livro.identificador==identificacao_livro){ // conferir se e o primeiro elemento
+        remover = aux;
+        *lista = aux->proximo; // ou remover->proximo
+    }else{ // conferir os elementos adiante
+
+        while (aux->proximo && aux->proximo->livro.identificador != identificacao_livro) // enquanto o proximo nao for NULL e diferente do identificador avance
+        {
+            aux = aux->proximo;
+        }
+
+        if(aux->proximo == NULL){
+            printf("ERRO! Nao existe usuario com este identiicador!\n");
+            return;
+        }else{
+
+            remover = aux->proximo;
+            aux->proximo = remover->proximo; // ou aux->proximo->proximo
+
+            printf("\t\t--------------------------------------------------- Removido com sucesso! -----------------------------------------------------\n\n");
+            printf("\t\tIdentificador: %d\n", remover->livro.identificador);
+            printf("\t\tTitulo: %s\n", remover->livro.titulo);
+            printf("\t\t");
+            imprimir_autores(&(remover->livro.lista_autores));
+            printf("\t\tAno: %d\n", remover->livro.ano);
+            printf("\t\tEdicao: %d\n", remover->livro.edicao);
+            printf("\t\tEditora: %s\n",remover->livro.editora);
+            printf("\t\t-----------------------------------------------------------------------------------------------------------------------------------\n\n");
+
+            
+        }
+        
+    }
+
+    remover_memoria_lista_autores(&(remover->livro.lista_autores));
+    free(remover);
+
+}
+
 int main () {
 
     /* Declarações para inicar a lista, isto é, a lista começarão apontando para NULL, pois ainda nao existe elementos nas listas */
@@ -507,20 +631,27 @@ int main () {
 
     /*
     
-    adicionar(&lista_usuarios);
-    adicionar(&lista_usuarios);
+    adicionar_usuario(&lista_usuarios);
+    adicionar_usuario(&lista_usuarios);
+    remover_usuario(&lista_usuarios);
+    imprimir_usuarios(lista_usuarios);
 
     alterar_usuario(&lista_usuarios);
 
     */
 
+    
+
    adicionar_livro(&lista_livros);
    adicionar_livro(&lista_livros);
 
-   adicionar_mais_um_autor_no_livro(&lista_livros);
+ //  adicionar_mais_um_autor_no_livro(&lista_livros);
 
-   remover_um_autor_no_livro(&lista_livros);
+ //  remover_um_autor_no_livro(&lista_livros);
+ remover_livro(&lista_livros);
    imprimir_livros(lista_livros);
+
+   
 
    
 
@@ -528,5 +659,5 @@ int main () {
 
     return 0;
 }
- /*A FAZER: remover usuarios, remover livros, adicionar reserva, alterar reserva, remover resevar. Atentar que, nao e obrigatorio, mas poder fazer uma
- função que quando deleta um usuario ou livro, a reserva que esteja com o elemento deletado tambem seja deletado! */
+ /*A FAZER: alterar livros, adicionar reserva, alterar reserva, remover resevar. Atentar que, nao e obrigatorio, mas poder fazer uma
+ função que quando deleta um usuario ou livro, a reserva que esteja com o elemento deletado tambem seja deletado! E tambem fazer uma função para liberar memoria de todas as listas*/
