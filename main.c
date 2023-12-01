@@ -1,285 +1,746 @@
 #include <stdio.h>
-#include<stdlib.h>
-#include<string.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
 
-#define MAX_CARACTERE_STR 100
-#define MAX_CARACTERE_DATA 10
+#define MAX_CARACTERE 100
+#define MAX_DATA 11
 
-/* Criacao das structs das nossas informações */
+int controleLivro = 0;
+int controleUsuario = 0;
+int controleReserva = 0;
 
 typedef struct {
-    char nome[MAX_CARACTERE_STR];
-    char instituicao[MAX_CARACTERE_STR];
-}Autor;
+    char nome[MAX_CARACTERE];
+    char instituicao[MAX_CARACTERE];
+} Autor;
 
-typedef struct no_autor{ // criação do nó para a lista de autores
+typedef struct no_Autor{
     Autor autor;
-    struct no_autor *proximo;
-}No_Autor;
+    struct no_Autor* proximo;
+} noAutor;
 
 typedef struct {
-    long identificador;
-    char titulo[MAX_CARACTERE_STR];
-    struct no_autor *lista_autores;
+    long int indetificador;
+    char titulo[MAX_CARACTERE];
+    struct no_Autor *listaAutores;
     int ano;
     int edicao;
-    char editora[MAX_CARACTERE_STR];
+    char editora[MAX_CARACTERE];
+} Livro;
 
-}Livro;
+typedef struct no_Livros{
+    Livro livro;
+    struct no_Livros* proximo;
+} noLivro;
 
 typedef struct {
-    int identificador; // identificador com 5 numeros (XXXXX)
-    char nome[MAX_CARACTERE_STR];
-    char endereco[MAX_CARACTERE_STR];
-    long telefone;
-}Usuario;
+    long int indetificador;
+    char nome[MAX_CARACTERE];
+    char endereco[MAX_CARACTERE];
+    long int telefone;
+} Usuario;
 
-typedef struct  {
-    char dataInicio[MAX_CARACTERE_DATA];
-    char dataFim[MAX_CARACTERE_DATA];
-    Usuario identificadorUser;  
-    Livro identificadorLivro;
+typedef struct no_Usuario{
+    Usuario usuario;
+    struct no_Usuario* proximo;
+} noUsuario;
+
+typedef struct {
+    char dataInicio[MAX_DATA];
+    char dataFim[MAX_DATA];
+    int identificadorUsuario;
+    int identificadorLivro;
 } Reserva;
 
-/* Criacao dos nós das listas encadeadas que sera responsavel por organizar nossas informações */
-
-typedef struct no_livro{ // criação do nó para a lista de livros
-    Livro livro;
-    struct no_livro *proximo;
-}No_Livro;
-
-typedef struct no_reserva{ // criação do nó para a lista de reservas
+typedef struct no_Reserva{
     Reserva reserva;
-    struct no_reserva *proximo;
-}No_Reserva;
+    struct no_Reserva* proximo;
+} noReserva;
 
-typedef struct no_usuario{ // criação do nó para a lista de usuarios
-    Usuario usuario;
-    struct no_usuario *proximo;
-}No_Usuario;
+void imprimirAutores (noAutor **listaAutores) {
+    noAutor *aux = *listaAutores;
+    if (*listaAutores == NULL) {
+        printf("A lista de autores está vazia!\n");
+        return ;
+    } else {
+        printf("\t\tAutores: ");
+        while (aux) {
+            printf("%s", aux->autor.nome);
+            if (aux->proximo) {
+                printf(", ");
+            }
+            aux = aux->proximo;
+        }
+    }
+    printf("\n");
+}
+
+void imprimirLivros(noLivro *listaLivro) {
+    if (listaLivro == NULL) {
+        printf("\n \t\tLista vazia!\n\n");
+        return ;
+    } else {
+
+        noLivro *aux = listaLivro;
+        printf("\n\t\t------------------------------------------------------- Livros Cadastrados -------------------------------------------------------\n\n");
+        int i = 0;
+        while (aux != NULL) {
+            i++;
+            printf("\t\tLivro %d", i);
+            printf("\n\t\tIdentificador: %ld\n", aux->livro.indetificador);
+            printf("\t\tTitulo: %s\n", aux->livro.titulo);
+            printf("\t\tAno de publicação: %d\n", aux->livro.ano);
+            imprimirAutores(&(aux->livro.listaAutores));
+            printf("\t\tEdição: %d\n", aux->livro.edicao);
+            printf("\t\tEditora: %s\n\n", aux->livro.editora);
+            printf("\t\t-----------------------------------------------------------------------------------------------------------------------------------\n\n");
+
+            aux = aux->proximo;
+        }
+    }
+
+}
 
 
-
-/* Funções relacionados aos usuarios, isto é, ADICIONAR - REMOVER - ALTERAR - IMPRIMIR */
-
-void imprimir_usuarios(No_Usuario *lista){
-    No_Usuario *aux = lista;
+void imprimirUsuarios (noUsuario *listaUsuario) {
+    if (listaUsuario == NULL) {
+        printf("\n \t\tNão há usuários cadastrados.\n\n");
+        return ;
+    }
+    noUsuario *aux = listaUsuario;
 
     printf("\t\t--------------------------------------------------------- Usuarios Cadastrados ---------------------------------------------------------\n\n");
 
     int i = 0;
-
-    while(aux) // enquanto aux for diferente de NULL, isto é, enquanto houver elementos na lista
-    {
+    while (aux) {
         i++;
-        printf("\t\t Usuario %d ( Nome: %15s | Endereco: %30s | Telefone: %11ld | Identificador: %5d )\n", i, aux->usuario.nome, aux->usuario.endereco, aux->usuario.telefone, aux->usuario.identificador);
+        printf("\t\t Usuário: %d (Nome: %15s | Endereço %30s | Telefone: %11ld | Identificador: %5ld)\n", i, aux->usuario.nome, aux->usuario.endereco, aux->usuario.telefone, aux->usuario.indetificador);
         aux = aux->proximo;
     }
 
     printf("\n\t\t-----------------------------------------------------------------------------------------------------------------------------------------\n\n");
 }
 
-void adicionar_usuario(No_Usuario **lista){
+void imprimirReservas (noReserva *listaReservas) {
+    noReserva *aux = listaReservas;
 
-    /*A FAZER: CONFERIR QUANTOS USUARIOS JA TEM NA LISTA, SE TIVER 10, NAO PODE ADICIONAR MAIS!!!!!!!!!!!!!*/
+    printf("\t\t---------------------------------------------------- Reservas Cadastrados -----------------------------------------------------\n\n");
+    int i = 0;
 
-    /* Parte para adicionar o novo usuario a lista de usuarios */
-    
-    No_Usuario *novo = malloc(sizeof(No_Usuario));
-
-    No_Usuario *aux;
-
-    if(novo){ // se houver sucesso na alocação de memoria
-
-
-    /* Parte para entrada das informaçoes em relaçao ao novo usuario cadastrado */
-
-        printf("Qual o nome do novo usuario: ");
-        fgets(novo->usuario.nome, sizeof(novo->usuario.nome), stdin);
-        novo->usuario.nome[strcspn(novo->usuario.nome, "\n")] = '\0'; // Remover o caractere de nova linha
-
-        printf("Qual o endereco do novo usuario: ");
-        fgets(novo->usuario.endereco, sizeof(novo->usuario.endereco), stdin);
-        novo->usuario.endereco[strcspn(novo->usuario.endereco, "\n")] = '\0'; // Remover o caractere de nova linha
-
-        printf("Qual o identificador do novo usuario (XXXXX): ");
-        scanf("%d", &novo->usuario.identificador);
-
-        /*Conferir se nao existe outro usuario com o mesmo identificador na lista*/
-        aux = *lista;
-        while (aux && aux->usuario.identificador != novo->usuario.identificador)
-        {
-            aux = aux->proximo;
-        }
-        if(aux!=NULL){
-            printf("\n\t\tERRO! Usuario com o mesmo identificador ja cadastrado! Nao podem existir o mesmo identificador para duas pessoas!\n");
-            return;
-        }
-        
-
-        printf("Qual o telefone do novo usuario: ");
-        scanf("%ld", &novo->usuario.telefone);
-
-        getchar();
-
-        novo->proximo = NULL; //como esta sendo adicionado ao ultimo da lista, entao nao ha proximo, sendo NULL
-
-        if(*lista==NULL) {   // se a lista de usuarios estiver vazia, isto é, estiver NULL, o primeiro elemento sera o novo usuario cadastrado
-
-            *lista = novo;
-         }else{ // se falso, vamos pecorrer a lista ate chegar no ultimo, lembrando que o ultimo sera oque aponta para NULL
-
-         aux = *lista;
-
-         while(aux->proximo != NULL){
-            aux = aux->proximo; // pecorrendo a lista
-         }
-         aux->proximo = novo; // o ultimo agora sera o penultimo e apontara para o novo usuario que agora é o ultimo da lista
-
-         }
-
-    }else{
-        printf("Erro ao alocar a memoria!\n");
-    }
-
-}
-
-
-void alterar_usuario(No_Usuario **lista){
-
-    imprimir_usuarios(*lista);
-
-    int identificador_usuario;
-    printf("Digite o identificador do usuario que queira alterar: ");
-    scanf("%d", &identificador_usuario);
-    getchar();
-
-    /*Buscar usuario*/
-
-    No_Usuario *aux = *lista;
-    while(aux && aux->usuario.identificador != identificador_usuario){ // se aux nao for nulo e for diferente do identificador, vá para o proximo elemenyp
+    while (aux) {
+        i++;
+        printf("\t\t Reserva %d (Data Início: %15s | Data do Fim: %15s | ID do usuário: %5d | ID do livro: %5d)", i, aux->reserva.dataInicio, aux->reserva.dataFim, aux->reserva.identificadorUsuario, aux->reserva.identificadorLivro);
         aux = aux->proximo;
     }
 
-    if(aux == NULL){ // se for NULL, significa que nao existe o identificador dentro da lista de usuarios
-        printf("Nao existe este identificador!\n");
-    }else{
-        printf("\t\t--------------------------------------------------------- Usuario escolhido para alterar ---------------------------------------------------------\n\n");
-        printf("\t\t ( Nome: %15s | Endereco: %30s | Telefone: %11ld | Identificador: %5d )\n",aux->usuario.nome, aux->usuario.endereco, aux->usuario.telefone, aux->usuario.identificador);
-        printf("\n\t\t-----------------------------------------------------------------------------------------------------------------------------------------\n\n");
-    }
-
-    /*Inserir dados para alterar usuario*/
-
-          printf("Insira os dados para alteracao:\n");
-
-        printf("Qual o nome do novo usuario: ");
-        fgets(aux->usuario.nome, sizeof(aux->usuario.nome), stdin);
-        aux->usuario.nome[strcspn(aux->usuario.nome, "\n")] = '\0'; // Remover o caractere de nova linha
-
-        printf("Qual o endereco do novo usuario: ");
-        fgets(aux->usuario.endereco, sizeof(aux->usuario.endereco), stdin);
-        aux->usuario.endereco[strcspn(aux->usuario.endereco, "\n")] = '\0'; // Remover o caractere de nova linha
-
-        /* retirei essa parte, pois se for para modificar o ID, é melhor adicionar o usuarui
-
-        printf("Qual o identificador do novo usuario (XXXXX): ");
-        scanf("%d", &aux->usuario.identificador);
-
-        */
-
-        printf("Qual o telefone do novo usuario: ");
-        scanf("%ld", &aux->usuario.telefone);
-
-        printf("\t\t--------------------------------------------------------- Usuario Alterado ---------------------------------------------------------\n\n");
-        printf("\t\t ( Nome: %15s | Endereco: %30s | Telefone: %11ld | Identificador: %5d )\n",aux->usuario.nome, aux->usuario.endereco, aux->usuario.telefone, aux->usuario.identificador);
-        printf("\n\t\t-----------------------------------------------------------------------------------------------------------------------------------------\n\n");
-
-        imprimir_usuarios(*lista);
+    printf("\t\t--------------------------------------------------------------------------------------------------------------\n\n");
 
 }
 
-void remover_usuario(No_Usuario **lista){
+/*
+    Método que adiciona um ou mais autores a um determinado livro;
+    So é chamada quando um livro está sendo cadastrado, e recebe por parametro uma lista de autores, um nome e uma insituição
+*/
 
-    imprimir_usuarios(*lista);
+void adicionarAutor (noAutor **listaAutor, char nome[], char instituicao[]) {
+    noAutor *novoAutor = malloc(sizeof(noAutor)), *aux;
 
-    int identificacao_usuario;
-    printf("Qual a identificacao do usuario em que vc queira remover: ");
-    scanf("%d", &identificacao_usuario);
+    if (novoAutor) {
+        strcpy(novoAutor->autor.nome, nome);
+        strcpy(novoAutor->autor.instituicao, instituicao);
+        novoAutor->proximo = NULL;
+
+        if (*listaAutor == NULL) {
+            *listaAutor = novoAutor;
+        } else {
+            aux = *listaAutor;
+            while (aux->proximo) {
+                aux = aux->proximo;    
+            }
+            aux->proximo = novoAutor;
+        }
+    } else {
+        printf("NÃO FOI POSSÍVEL ALOCAR ESPAÇO NA MEMÓRIA\n");
+    }
+}
+
+/*
+    Método que adiciona livros a memória do programa.
+    @param: listaLirvro 
+    Recebe por parametro uma lista de livros
+*/
+
+void removeMemoriaListaAutores (noAutor **listaAutores) {
+    noAutor *aux = *listaAutores;
+    while (aux) {
+        *listaAutores = (*listaAutores)->proximo;
+        free(aux);
+        aux = *listaAutores;
+    }
+}
+
+void adicionarLivro(noLivro **listaLivro) {
+    // Pede o indentificador ao user para verificar se já existe algum livro com aquele identificador
+    if (controleLivro < 1) {
+        noLivro *novoLivro = malloc(sizeof(noLivro)), *aux;
+
+        if (novoLivro) {
+            novoLivro->livro.listaAutores = NULL;
+
+            printf("Qual o identificador do livro (XXXXXX): ");
+            scanf("%ld", &novoLivro->livro.indetificador);
+            getchar();
+
+            aux = *listaLivro;
+
+            while ((aux) && (aux->livro.indetificador != novoLivro->livro.indetificador)) {
+                aux = aux->proximo;
+            }
+
+            if (aux != NULL) {
+                printf("\t\tEsse indetificador já foi utilizado em outro livro !");
+                return ;
+            }
+
+            printf("Qual o título do livro: ");
+            fgets(novoLivro->livro.titulo, MAX_CARACTERE, stdin);
+            novoLivro->livro.titulo[strcspn(novoLivro->livro.titulo, "\n")] = '\0'; // Remover o caractere de nova linha
+
+            int qtdAutores;
+            printf("Quantos autores o livro tem: ");
+            scanf("%d", &qtdAutores);
+            getchar();
+            if (qtdAutores <= 0) {
+                printf("Quantos autores o livro tem: ");
+                scanf("%d", &qtdAutores);
+                getchar();
+            }
+
+            novoLivro->livro.listaAutores = NULL;
+
+            for (int i = 0; i < qtdAutores; i++) {
+                char autor[MAX_CARACTERE], instituicao[MAX_CARACTERE];
+
+                printf("%dº autor(a): ", i+1);
+                fgets(autor, MAX_CARACTERE, stdin);
+                autor[strcspn(autor, "\n")] = '\0';
+
+                printf("Instituição de '%s': ", autor);
+                fgets(instituicao, MAX_CARACTERE, stdin);
+                instituicao[strcspn(instituicao, "\n")] = '\0';
+
+                adicionarAutor(&(novoLivro->livro.listaAutores), autor, instituicao);
+            }
+
+
+            printf("Ano de publicação do livro: ");
+            scanf("%d", &novoLivro->livro.ano);
+
+            printf("Número de edição do livro: ");
+            scanf("%d", &novoLivro->livro.edicao);
+            getchar();
+
+            printf("Qual a editora do livro: ");
+            fgets(novoLivro->livro.editora, MAX_CARACTERE, stdin);
+            novoLivro->livro.editora[strcspn(novoLivro->livro.editora, "\n")] = '\0';
+
+            novoLivro->proximo = NULL;
+
+            if (*listaLivro) {
+                aux = *listaLivro;
+                while (aux->proximo) {
+                    aux = aux->proximo;
+                } 
+                aux->proximo = novoLivro;
+            } else {
+                *listaLivro = novoLivro;
+            }
+            controleLivro++;
+        } else {
+            printf("NÃO FOI POSSÍVEL ALOCAR ESPAÇO NA MEMÓRIA");
+        }
+    } else {
+        printf("\t\tQuantidade máxima de livros atingida\n");
+        return ;
+    }
+
+}
+
+void adicionarUsuario(noUsuario **listaUsuario) {
+    if (controleUsuario < 1) {
+        noUsuario *novoUsuario = malloc(sizeof(noUsuario)), *aux;
+
+        if (novoUsuario) {
+            printf("Informe o identificador do usuário (XXXXX): ");
+            scanf("%ld", &novoUsuario->usuario.indetificador);
+            getchar();
+
+            printf("Informe o nome do usuário: ");
+            fgets(novoUsuario->usuario.nome, MAX_CARACTERE, stdin);
+            novoUsuario->usuario.nome[strcspn(novoUsuario->usuario.nome, "\n")] = '\0';
+
+            printf("Informe o endereço do usuário: ");
+            fgets(novoUsuario->usuario.endereco, MAX_CARACTERE, stdin);
+            novoUsuario->usuario.endereco[strcspn(novoUsuario->usuario.endereco, "\n")] = '\0';
+
+            printf("Informe o telefone do usuário: ");
+            scanf("%ld", &novoUsuario->usuario.telefone);
+            getchar();
+
+            novoUsuario->proximo = NULL;
+
+            if (*listaUsuario) {
+                aux = *listaUsuario;
+                while (aux->proximo) {
+                    aux = aux->proximo;
+                } 
+                aux->proximo = novoUsuario;
+            } else {
+                *listaUsuario = novoUsuario;
+            }
+            controleUsuario++;
+
+        } else {
+            printf("Não foi possível alocar espaço na memória para usuário\n");
+            return ;
+        }
+    } else {
+        printf("\t\t O limite de Usuários no sistema já foi preenchido\n");
+        return ;
+    }
+}
+
+void adicionarReserva(noReserva **listaReserva, noLivro **listaLivros, noUsuario **listaUsuario) {
+    if (*listaLivros == NULL || *listaUsuario == NULL) {
+        printf("\t\tNão é possível realizar reservas sem livros ou autores no arcevo\n");
+        return ;
+    }
+    if (controleReserva < 1) {
+        noReserva *novaReserva = malloc(sizeof(noReserva)), *aux;
+
+        if (novaReserva) {
+            printf("Informe a data da reserva (dd/mm/aa): ");
+            fgets(novaReserva->reserva.dataInicio, MAX_DATA, stdin);
+            novaReserva->reserva.dataInicio[strcspn(novaReserva->reserva.dataInicio, "\n")] = '\0';
+
+
+            printf("Informe o identificador do usuário (XXXXX): ");
+            scanf("%d", &novaReserva->reserva.identificadorUsuario);
+            getchar();
+
+            noUsuario *auxUsuario = *listaUsuario;
+            while (auxUsuario) {
+                if (auxUsuario->usuario.indetificador == novaReserva->reserva.identificadorUsuario) {
+                    break;
+                }
+                auxUsuario = auxUsuario->proximo;
+            }
+
+            if (auxUsuario == NULL) {
+                printf("\t\tID de usuário não identificado\n");
+                return ;
+            }
+
+            printf("Informe o identificador do livro (XXXXX): ");
+            scanf("%d", &novaReserva->reserva.identificadorLivro);
+            getchar();
+
+            noLivro *auxLivro = *listaLivros;
+            while (auxLivro) {
+                if (auxLivro->livro.indetificador == novaReserva->reserva.identificadorLivro) {
+                    break;
+                }
+                auxLivro = auxLivro->proximo;
+            }
+
+            if (auxLivro == NULL) {
+                printf("\t\tID de livro não identificado\n");
+                return ;
+            }
+
+            printf("Informe a data de entrega (dd/mm/aa): ");
+            fgets(novaReserva->reserva.dataFim, MAX_DATA, stdin);
+            novaReserva->reserva.dataFim[strcspn(novaReserva->reserva.dataFim, "\n")] = '\0';
+
+            novaReserva->proximo = NULL;
+
+            if (*listaReserva) {
+                aux = *listaReserva;
+                while (aux->proximo) {
+                    aux = aux->proximo;
+                } 
+                aux->proximo = novaReserva;
+            } else {
+                *listaReserva = novaReserva;
+            }
+            controleReserva++;
+        } else {
+            printf("Não foi possível alocar espaço na memória para reserva");
+            return ;
+        }
+    } else {
+        printf("Limite de reservas atingido!");
+        return ;
+    }
+}
+
+void removerAutores(noAutor **listaAutores) {
+    noAutor *aux = *listaAutores;
+    while (aux) {
+        *listaAutores = (*listaAutores)->proximo;
+        free(aux);
+        aux = *listaAutores;
+    }
+}
+
+void excluirLivro(noLivro **listaLivro) {
+    if (*listaLivro == NULL) {
+        printf("\n \t\tA lista de livros está vazia\n\n");
+        return ;
+    }
+
+    imprimirLivros(*listaLivro);
+
+    int identificacao;
+    printf("Informe a identificação do livro que deseja excluir: ");
+    scanf("%d", &identificacao);
     getchar();
-    
 
-    No_Usuario *aux = *lista;
-    No_Usuario *remover = NULL;
+    noLivro *aux = *listaLivro, *remover = NULL;
 
-    if(aux->usuario.identificador==identificacao_usuario){ // conferir se e o primeiro elemento
+    if (aux->livro.indetificador == identificacao) {
         remover = aux;
-        *lista = aux->proximo; // ou remover->proximo
-    }else{ // conferir os elementos adiante
+        *listaLivro = aux->proximo;
+    } else {
+        while (aux->proximo && aux->livro.indetificador != identificacao) {
+            aux = aux->proximo;
+        }
+        if (aux == NULL) {
+            printf("\t\tID de usuário não encontrado\n");
+            return ;
+        } else {
+            remover = aux->proximo;
+            aux->proximo = remover->proximo;
 
-        while (aux->proximo && aux->proximo->usuario.identificador != identificacao_usuario) // enquanto o proximo nao for NULL e diferente do identificador avance
-        {
+            printf("\t\t--------------------------------------------------- Removido com sucesso! -----------------------------------------------------\n\n");
+            printf("\t\tIdentificador: %ld\n", remover->livro.indetificador);
+            printf("\t\tTítulo: %s\n", remover->livro.titulo);
+            printf("\t\t");
+            imprimirAutores(&(remover->livro.listaAutores));
+            printf("\t\tAno: %d\n", remover->livro.ano);
+            printf("\t\tEdição: %d\n", remover->livro.edicao);
+            printf("\t\tEditora: %s\n", remover->livro.editora);
+            printf("\t\t--------------------------------------------------- Removido com sucesso! -----------------------------------------------------\n\n");
+
+        }
+    }
+    removerAutores(&(remover->livro.listaAutores));
+    controleLivro--;
+    free(remover);
+}
+
+void excluirUsuario(noUsuario **listaUsuarios) {
+    if (*listaUsuarios == NULL) {
+        printf("\n\t\tNão há usuários cadastrados\n\n");
+        return ;
+    }
+    imprimirUsuarios(*listaUsuarios);
+
+    int identificacao;
+    printf("Informe a identificação do usuário: ");
+    scanf("%d", &identificacao);
+    getchar();
+
+    noUsuario *aux = *listaUsuarios, *remover = NULL;
+    if (aux->usuario.indetificador == identificacao) {
+        remover = aux;
+        *listaUsuarios = aux->proximo;
+    } else {
+        while (aux->proximo && aux->usuario.indetificador != identificacao) {
+            aux = aux->proximo;
+        }
+        if (aux == NULL) {
+            printf("\t\tID de usuário não encontrado\n");
+            return ;
+        } else {
+            remover = aux->proximo;
+            aux->proximo = remover->proximo;
+            printf("\t\t--------------------------------------------------- Removido com sucesso! -----------------------------------------------------\n\n");
+            printf("\t\t (Nome: %15s | Endereço: %30s | Telefone: %11ld | Identificador: %5ld)\n\n", remover->usuario.nome, remover->usuario.endereco, remover->usuario.telefone, remover->usuario.indetificador);
+            printf("\t\t-----------------------------------------------------------------------------------------------------------------------------------\n\n");
+        }
+    }
+    controleUsuario--;
+    free(remover);
+}
+
+void excluirReserva(noReserva **listaReserva) {
+    noReserva *aux = *listaReserva, *remover = NULL;
+
+    if (*listaReserva == NULL) {
+        printf("\n \t\tNão existem reservas no sistemas\n\n");
+        return ;
+    } else {
+        // imprimiReserva();
+
+        int idUser, idLivro;
+        printf("Informe o ID do usuário: ");
+        scanf("%d", &idUser);
+        getchar();
+
+        printf("Informe o ID do livro: ");
+        scanf("%d", &idLivro);
+        getchar();
+
+        if (aux->reserva.identificadorUsuario == idUser && aux->reserva.identificadorLivro == idLivro) {
+            remover = aux;
+            *listaReserva = aux->proximo;
+            printf("\t\t--------------------------------------------------- Removido com sucesso! -----------------------------------------------------\n\n");
+            printf("\t\t(Data início: %s | Data fim: %s | ID usuário: %d | ID livro: %d\n\n)", remover->reserva.dataInicio, remover->reserva.dataFim, remover->reserva.identificadorUsuario, remover->reserva.identificadorUsuario);
+            printf("\t\t--------------------------------------------------- Removido com sucesso! -----------------------------------------------------\n\n");
+        } else {
+            while (aux->proximo && aux->reserva.identificadorUsuario != idUser && aux->reserva.identificadorLivro != idLivro) {
+                aux = aux->proximo;
+            }
+            if (aux == NULL) {
+                printf("\t\tID do livro ou do Usuário não encontrado\n");
+                return ;
+            } else {
+                remover = aux->proximo;
+                aux->proximo = remover->proximo;
+                printf("\t\t--------------------------------------------------- Removido com sucesso! -----------------------------------------------------\n\n");
+                printf("\t\t (Data início: %s | Data fim: %s | ID usuário: %d | ID livro: %d\n\n)", remover->reserva.dataInicio, remover->reserva.dataFim, remover->reserva.identificadorUsuario, remover->reserva.identificadorUsuario);
+                printf("\t\t--------------------------------------------------- Removido com sucesso! -----------------------------------------------------\n\n");
+            }
+        }
+        controleReserva--;
+        free(remover);
+    }
+}
+
+void alterarLivro(noLivro **listaLivro) {
+    if (*listaLivro == NULL) {
+        printf("\n \t\tNão há livros cadastrado para se alterar\n\n");
+        return ;
+    } else {
+        imprimirLivros(*listaLivro);
+
+        int indentificadorLivro;
+        printf("Informe o identificador do livro que deseja alterar (XXXXXX): ");
+        scanf("%d", &indentificadorLivro);
+        getchar();
+
+        noLivro *aux = *listaLivro;
+
+        while ((aux) && (aux->livro.indetificador != indentificadorLivro)) {
             aux = aux->proximo;
         }
 
-        if(aux->proximo == NULL){
-            printf("ERRO! Nao existe usuario com este identiicador!\n");
-            return;
-        }else{
-
-            remover = aux->proximo;
-            aux->proximo = remover->proximo; // ou aux->proximo->proximo
-
-            printf("\t\t--------------------------------------------------- Removido com sucesso! -----------------------------------------------------\n\n");
-            printf("\t\t ( Nome: %15s | Endereco: %30s | Telefone: %11ld | Identificador: %5d )\n\n", remover->usuario.nome, remover->usuario.endereco, remover->usuario.telefone, remover->usuario.identificador);
+        if (aux == NULL) {
+            printf("Indentificador não encontrado\n");
+            return ;
+        } else {
+            printf("\t\t------------------------------------------------ Livro escolhido para modificar -------------------------------------------------\n\n");
+            printf("\n\t\tIdentificador: %ld\n", aux->livro.indetificador);
+            printf("\t\tTitulo: %s\n", aux->livro.titulo);
+            printf("\t\tAno de publicação: %d\n", aux->livro.ano);
+            imprimirAutores(&(aux->livro.listaAutores));
+            printf("\t\tEdição: %d\n", aux->livro.edicao);
+            printf("\t\tEditora: %s\n\n", aux->livro.editora);
             printf("\t\t-----------------------------------------------------------------------------------------------------------------------------------\n\n");
-        }
-        
-    }
 
-    free(remover);
-    
-}
+            printf("Informe o novo título: ");
+            fgets(aux->livro.titulo, MAX_CARACTERE, stdin);
+            aux->livro.titulo[strcspn(aux->livro.titulo, "\n")] = '\0';
 
+            printf("Informe o novo ano: ");
+            scanf("%d", &aux->livro.ano);
+            getchar();
 
+            printf("Qual a edicao do livro: ");
+            scanf("%d", &aux->livro.edicao);
 
-/* Funções relacionados aos livros e autores, isto é, ADICIONAR - REMOVER - ALTERAR - IMPRIMIR 
-   A autores, deve incluir a função adionar ou deletar! (a fazer)*/
+            getchar();
 
+            printf("Qual a editora do livro: ");
+            fgets(aux->livro.editora, sizeof(aux->livro.editora), stdin);
+            aux->livro.editora[strcspn(aux->livro.editora, "\n")] = '\0'; // Remover o caractere de nova linha
 
-// funçoes para adicionar autor
+            int qtdAutores;
 
-void adicionar_autor(No_Autor **lista, char nome[100], char instituicao[100]){  // sera responsavel para adicionar na lista encadeada de autores de cada livro
+            removeMemoriaListaAutores(&(aux->livro.listaAutores));
+            aux->livro.listaAutores = NULL;
+            printf("Quantos autores: ");
+            scanf("%d", &qtdAutores);
+            getchar();
 
-
-    No_Autor *novo = malloc(sizeof(No_Autor)), *aux;
-
-    if(novo){
-
-        strcpy(novo->autor.nome, nome);
-        strcpy(novo->autor.instituicao, instituicao);
-        novo->proximo = NULL;
-
-        if(*lista == NULL){
-            *lista = novo;
-        }else{
-            aux = *lista;
-            while (aux->proximo)
-            {
-                aux = aux->proximo;
+            for (int i = 1; i <= qtdAutores; i++) {
+                char autor[MAX_CARACTERE], instituicao[MAX_CARACTERE];
+                printf("%dº Autor(a)\n", i);
+                printf("Digite o nome do autor: ");
+                fgets(autor, MAX_CARACTERE, stdin);
+                autor[strcspn(autor, "\n")] = '\0';
+                printf("Digite o nome do intituicao: ");
+                fgets(instituicao, MAX_CARACTERE, stdin);
+                instituicao[strcspn(instituicao, "\n")] = '\0';
+                adicionarAutor(&(aux->livro.listaAutores), autor, instituicao);
             }
-            aux->proximo = novo;
-        }
 
-    }else{
-        printf("Erro ao alocar memoria!");
+            printf("\t\t------------------------------------------------ Livro escolhido para modificar -------------------------------------------------\n\n");
+            printf("\n\t\tIdentificador: %ld\n", aux->livro.indetificador);
+            printf("\t\tTitulo: %s\n", aux->livro.titulo);
+            printf("\t\tAno de publicação: %d\n", aux->livro.ano);
+            imprimirAutores(&(aux->livro.listaAutores));
+            printf("\t\tEdição: %d\n", aux->livro.edicao);
+            printf("\t\tEditora: %s\n\n", aux->livro.editora);
+            printf("\t\t-----------------------------------------------------------------------------------------------------------------------------------\n\n");
+
+        }
+        imprimirLivros(*listaLivro);
     }
 }
 
-No_Autor *remover_autor(No_Autor **lista, char nome[]){
+void alteraUsuario(noUsuario **listaUsuario) {
+    if (*listaUsuario == NULL) {
+        printf("\n \t\t Não há usuários cadastrados\n\n");
+        return ;
+    }
+    imprimirUsuarios(*listaUsuario);
 
-    No_Autor *aux = *lista;
-    No_Autor *remover = NULL;
+    int identificador;
+    printf("Informe o ID do usuário que deseja alterar: ");
+    scanf("%d", &identificador);
+    getchar();
+
+    noUsuario *aux = *listaUsuario;
+    while (aux && aux->usuario.indetificador != identificador) {
+        aux = aux->proximo;
+    }
+    if (aux == NULL) {
+        printf("\t\tID de usuário não encontrado\n");
+        return ;
+    } else {
+        printf("\t\t--------------------------------------------------------- Usuario escolhido para alterar ---------------------------------------------------------\n\n");
+        printf("\t\t ( Nome: %15s | Endereco: %30s | Telefone: %11ld | Identificador: %5ld )\n",aux->usuario.nome, aux->usuario.endereco, aux->usuario.telefone, aux->usuario.indetificador);
+        printf("\n\t\t-----------------------------------------------------------------------------------------------------------------------------------------\n\n");
+    }
+
+    printf("Forneça os dados parar realizar as alterações: \n");
+    printf("Qual o novo nome do usuário: ");
+    fgets(aux->usuario.nome, MAX_CARACTERE, stdin);
+    aux->usuario.nome[strcspn(aux->usuario.nome, "\n")] = '\0';
+
+    printf("Qual o novo endereço do usuário: ");
+    fgets(aux->usuario.endereco, MAX_CARACTERE, stdin);
+    aux->usuario.endereco[strcspn(aux->usuario.endereco, "\n")] = '\0';
+
+    printf("Qual o novo telefone: ");
+    scanf("%ld", &aux->usuario.telefone);
+
+    printf("\t\t--------------------------------------------------------- Usuario escolhido para alterar ---------------------------------------------------------\n\n");
+    printf("\t\t ( Nome: %15s | Endereco: %30s | Telefone: %11ld | Identificador: %5ld )\n",aux->usuario.nome, aux->usuario.endereco, aux->usuario.telefone, aux->usuario.indetificador);
+    printf("\n\t\t-----------------------------------------------------------------------------------------------------------------------------------------\n\n");
+
+    imprimirUsuarios(*listaUsuario);
+}
+
+void alterarReserva(noReserva **listaReserva) {
+
+    if (*listaReserva == NULL) {
+        printf("\n \t\tNão existem reservas no sistemas\n\n");
+        return ;
+    } else {
+        imprimirReservas(*listaReserva);
+
+        noReserva *aux = *listaReserva;
+
+        int idUser, idLivro;
+        printf("Informe o ID do usuário: ");
+        scanf("%d", &idUser);
+        getchar();
+
+        printf("Informe o ID do livro: ");
+        scanf("%d", &idLivro);
+        getchar();
+
+        while (aux && aux->reserva.identificadorUsuario != idUser && aux->reserva.identificadorLivro != idLivro) {
+            aux = aux->proximo;
+        }
+        if (aux == NULL) {
+            printf("\t\tReserva não encontrada\n");
+            return ;
+        } else {
+            printf("\t\t--------------------------------------------------------- Reserva escolhida para alterar ---------------------------------------------------------\n\n");
+            printf("\t\t ( Data início: %15s | Data Fim: %15s | ID Usuario: %5d | ID Livro: %5d )\n",aux->reserva.dataInicio, aux->reserva.dataFim, aux->reserva.identificadorUsuario, aux->reserva.identificadorLivro);
+            printf("\n\t\t-----------------------------------------------------------------------------------------------------------------------------------------\n\n");
+        }
+
+        printf("Informe a nova data do início da reserva: ");
+        fgets(aux->reserva.dataInicio, MAX_DATA, stdin);
+        aux->reserva.dataInicio[strcspn(aux->reserva.dataInicio, "\n")] = '\0';
+        getchar();
+
+        printf("Informe a nova data do fim da reserva: ");
+        fgets(aux->reserva.dataFim, MAX_DATA, stdin);
+        aux->reserva.dataFim[strcspn(aux->reserva.dataFim, "\n")] = '\0';
+
+        printf("\t\t--------------------------------------------------------- Reserva escolhida para alterar ---------------------------------------------------------\n\n");
+        printf("\t\t ( Data início: %15s | Data Fim: %15s | ID Usuario: %5d | ID Livro: %5d )\n",aux->reserva.dataInicio, aux->reserva.dataFim, aux->reserva.identificadorUsuario, aux->reserva.identificadorLivro);
+        printf("\n\t\t-----------------------------------------------------------------------------------------------------------------------------------------\n\n");
+    }
+
+    imprimirReservas(*listaReserva);
+}
+
+void incluirAutor (noLivro **listaLivro) {
+    int identificacaoLivro;
+    printf("Informe a identificação do livro em que deseja inlcuir o autor: ");
+    scanf("%d", &identificacaoLivro);
+    getchar();
+
+    noLivro *aux = *listaLivro;
+
+    while (aux->livro.indetificador != identificacaoLivro) {
+        aux = aux->proximo;
+    }
+
+    if (aux == NULL) {
+        printf("\n \t\tIdentificador não encontrado\n\n");
+        return ;
+    }
+
+     printf("\t\t------------------------------------------- Livro com autor que sera adicionado --------------------------------------------------\n\n");
+            printf("\t\tIdentificador: %d\n", aux->livro.indetificador);
+            printf("\t\tTitulo: %s\n", aux->livro.titulo);
+            imprimirAutores(&(aux->livro.listaAutores));
+            printf("\t\tAno: %d\n", aux->livro.ano);
+            printf("\t\tEdicao: %d\n", aux->livro.edicao);
+            printf("\t\tEditora: %s\n",aux->livro.editora);
+            printf("\t\t-----------------------------------------------------------------------------------------------------------------------------------\n\n");
+
+            printf("Digite o nome do autor: ");
+            char autor[MAX_CARACTERE];
+            fgets(autor, MAX_CARACTERE, stdin);
+            printf("Digite o nome da instituicao autor: ");
+            char instituicao[MAX_CARACTERE];
+            fgets(instituicao, MAX_CARACTERE, stdin);
+            adicionarAutor(&(aux->livro.listaAutores), autor, instituicao);
+
+            printf("\t\t--------------------------------------------------- Adicionado com sucesso! -----------------------------------------------------\n\n");
+            printf("\t\tIdentificador: %d\n", aux->livro.indetificador);
+            printf("\t\tTitulo: %s\n", aux->livro.titulo);
+            imprimirAutores(&(aux->livro.listaAutores));
+            printf("\t\tAno: %d\n", aux->livro.ano);
+            printf("\t\tEdicao: %d\n", aux->livro.edicao);
+            printf("\t\tEditora: %s\n",aux->livro.editora);
+            printf("\t\t-----------------------------------------------------------------------------------------------------------------------------------\n\n");
+}
+
+noAutor *remover_autor(noAutor **lista, char nome[]){
+
+    noAutor *aux = *lista;
+    noAutor *remover = NULL;
 
     if(*lista == NULL){
         printf("Nao ha autor neste livro!\n");
@@ -293,8 +754,8 @@ No_Autor *remover_autor(No_Autor **lista, char nome[]){
             return remover;
 
         }else{ // se nao for o primeiro elemento
-        
-        while(aux->proximo && (strcmp(nome, aux->proximo->autor.nome) != 0)){ // avança enquanto aux->proximo for diferente de NULL ou quando for diferente do nome, assim teremos o elemento anterior do que queremos deletar
+
+        while((strcmp(nome, aux->proximo->autor.nome) != 0) && aux->proximo){ // avança enquanto aux->proximo for diferente de NULL ou quando for diferente do nome, assim teremos o elemento anterior do que queremos deletar
             aux = aux->proximo;
         }
 
@@ -313,229 +774,33 @@ No_Autor *remover_autor(No_Autor **lista, char nome[]){
 }
 
 
-// função para adicionar livro
-
-void adicionar_livro(No_Livro **lista){
-
-    No_Livro *novo = malloc(sizeof(No_Livro)), *aux;
-
-        if(novo){
-
-            novo->livro.lista_autores = NULL; //vamos comecar declarando a lista de autores como vazia
-
-
-            printf("Qual o identificador do livro (XXXXX): ");
-            scanf("%d", &novo->livro.identificador);
-
-            getchar();
-
-            /*Conferir se nao existe outro usuario com o mesmo identificador na lista*/
-            aux = *lista;
-            while (aux && aux->livro.identificador != novo->livro.identificador)
-            {
-                aux = aux->proximo;
-            }
-            if(aux!=NULL){
-                printf("\n\t\tERRO! Usuario com o mesmo identificador ja cadastrado! Nao podem existir o mesmo identificador para duas pessoas!\n");
-                return;
-            }
-
-            printf("Qual o titulo do livro: ");
-            fgets(novo->livro.titulo, sizeof(novo->livro.titulo), stdin);
-            novo->livro.titulo[strcspn(novo->livro.titulo, "\n")] = '\0'; // Remover o caractere de nova linha
-
-            printf("Qual o ano do livro: ");
-            scanf("%d", &novo->livro.ano);
-
-            printf("Qual a edicao do livro: ");
-            scanf("%d", &novo->livro.edicao);
-
-            getchar();
-
-            printf("Qual a editora do livro: ");
-            fgets(novo->livro.editora, sizeof(novo->livro.editora), stdin);
-            novo->livro.editora[strcspn(novo->livro.editora, "\n")] = '\0'; // Remover o caractere de nova linha
-
-            int quant_autores;
-
-            printf("Quantos autores: ");
-
-            scanf("%d", &quant_autores);
-
-            getchar();
-
-            for(int i = 0; i < quant_autores; i++){
-
-                char autor[100], instituicao[100];
-
-                printf("Autor %d\n", i+1);
-
-                printf("Digite o nome do autor: ");
-                gets(autor);
-
-
-                printf("Digite a instituicao do autor: ");
-                gets(instituicao);
-
-
-                adicionar_autor(&(novo->livro.lista_autores), autor, instituicao); // vai adicionando na lista de autores (lista encadeada)
-
-            }
-
-
-            novo->proximo = NULL;
-
-
-            if(*lista==NULL){
-
-                    *lista = novo;
-
-            }else{
-
-                    aux = *lista;
-                    while (aux->proximo)
-                    {
-                        aux = aux->proximo;
-                    }
-
-                    aux->proximo = novo;
-
-            }
-
-
-        }else{
-            printf("Erro ao alocar a memoria!");
-        }
-
-
-}
-
-void imprimir_autores(No_Autor **lista_autores){
-    No_Autor *aux = *lista_autores;
-
-    if(*lista_autores == NULL){
-        printf("Autor: Desconhecido");
-    }else{
-
-        printf("Autores: ");
-
-
-    while (aux)
-    {
-
-        printf("%s", aux->autor.nome);
-
-        if(aux->proximo){
-            printf(", ");
-        }
-
-        aux = aux->proximo;
+void excluirAutor (noLivro **listaLivro) {
+    if (*listaLivro == NULL) {
+        printf("\n \t\tNão há autores para ser excluir\n\n");
+        return ;
     }
-    }
-
-    printf("\n");
-}
-
-void imprimir_livros(No_Livro *lista){
-    No_Livro *aux = lista;
-
-    if(lista == NULL){
-        printf("Lista vazia!\n");
-    }else{
-
-        printf("\n\t\t--------------------------------------------------------- Livros Cadastrados ------------------------------------------------------\n\n");
-        int i = 0;
-
-        while (aux)
-        {
-            printf("\t\t-----------------------------------------------------------------------------------------------------------------------------------\n\n");
-            i++;
-            printf("\t\tLivro %d Identificador: %d\n",i, aux->livro.identificador);
-            printf("\t\tLivro %d Titulo: %s\n",i, aux->livro.titulo);
-            printf("\t\tLivro %d ",i);
-            imprimir_autores(&(aux->livro.lista_autores));
-            printf("\t\tLivro %d Ano: %d\n",i, aux->livro.ano);
-            printf("\t\tLivro %d Edicao: %d\n",i, aux->livro.edicao);
-            printf("\t\tLivro %d Editora: %s\n",i, aux->livro.editora);
-            printf("\t\t-----------------------------------------------------------------------------------------------------------------------------------\n\n");
-            aux = aux->proximo;
-
-        }
-
-
-    }
-}
-
-void adicionar_mais_um_autor_no_livro(No_Livro **lista){
-    int identificacao_livro;
-    printf("Qual a identificacao do livro em que vc queira adicionar um autor: ");
-    scanf("%d", &identificacao_livro);
+    int indentificarLivro;
+    printf("Qual a identificação do livro que deseja ");
+    scanf("%d", &indentificarLivro);
     getchar();
 
-    /*Buscar o livro*/
-    No_Livro *aux = *lista;
+    noLivro *aux = *listaLivro;
+    noAutor *remover;
 
-    while(aux && aux->livro.identificador != identificacao_livro){ // enquanto aux nao é NULL e aux nao possui identificador: avance um elemento
+    while (aux && aux->livro.indetificador != indentificarLivro) {
         aux = aux->proximo;
     }
-    if(aux==NULL){
-        printf("Identificador nao achado!");
-    }else{
 
-            printf("\t\t------------------------------------------- Livro com autor que sera adicionado --------------------------------------------------\n\n");
-            printf("\t\tIdentificador: %d\n", aux->livro.identificador);
-            printf("\t\tTitulo: %s\n", aux->livro.titulo);
-            printf("\t\t");
-            imprimir_autores(&(aux->livro.lista_autores));
-            printf("\t\tAno: %d\n", aux->livro.ano);
-            printf("\t\tEdicao: %d\n", aux->livro.edicao);
-            printf("\t\tEditora: %s\n",aux->livro.editora);
-            printf("\t\t-----------------------------------------------------------------------------------------------------------------------------------\n\n");
-
-            printf("Digite o nome do autor: ");
-            char autor[MAX_CARACTERE_STR];
-            gets(autor);
-            printf("Digite o nome da instituicao autor: ");
-            char instituicao[MAX_CARACTERE_STR];
-            gets(instituicao);
-            adicionar_autor(&(aux->livro.lista_autores), autor, instituicao);
-
-            printf("\t\t--------------------------------------------------- Adicionado com sucesso! -----------------------------------------------------\n\n");
-            printf("\t\tIdentificador: %d\n", aux->livro.identificador);
-            printf("\t\tTitulo: %s\n", aux->livro.titulo);
-            printf("\t\t");
-            imprimir_autores(&(aux->livro.lista_autores));
-            printf("\t\tAno: %d\n", aux->livro.ano);
-            printf("\t\tEdicao: %d\n", aux->livro.edicao);
-            printf("\t\tEditora: %s\n",aux->livro.editora);
-            printf("\t\t-----------------------------------------------------------------------------------------------------------------------------------\n\n");
+    if (aux == NULL) {
+        printf("\n \t\t Identificador não encontrado! \n\n");
+        return ;
     }
-}
 
-void remover_um_autor_no_livro(No_Livro **lista){
-
-    int identificacao_livro;
-    printf("Qual a identificacao do livro em que vc queira remover um autor: ");
-    scanf("%d", &identificacao_livro);
-    getchar();
-
-    /*Buscar o livro*/
-    No_Livro *aux = *lista;
-
-    No_Autor *remover; // ponteiro para recebermos o elemento que iremos remover
-
-    while(aux && aux->livro.identificador != identificacao_livro){ // enquanto aux nao é NULL e aux nao possui identificador: avance um elemento
-        aux = aux->proximo;
-    }
-    if(aux==NULL){
-        printf("Identificador nao achado!");
-    }else{
-
-            printf("\t\t------------------------------------------- Livro com autor que sera removido --------------------------------------------------\n\n");
-            printf("\t\tIdentificador: %d\n", aux->livro.identificador);
+    printf("\t\t------------------------------------------- Livro com autor que sera removido --------------------------------------------------\n\n");
+            printf("\t\tIdentificador: %d\n", aux->livro.indetificador);
             printf("\t\tTitulo: %s\n", aux->livro.titulo);
             printf("\t\t");
-            imprimir_autores(&(aux->livro.lista_autores));
+            imprimirAutores(&(aux->livro.listaAutores));
             printf("\t\tAno: %d\n", aux->livro.ano);
             printf("\t\tEdicao: %d\n", aux->livro.edicao);
             printf("\t\tEditora: %s\n",aux->livro.editora);
@@ -543,219 +808,132 @@ void remover_um_autor_no_livro(No_Livro **lista){
 
 
             printf("Digite o nome do autor que queira deletar: ");
-            char autor[MAX_CARACTERE_STR];
-            gets(autor);
-            remover = remover_autor(&(aux->livro.lista_autores), autor);
+            char autor[MAX_CARACTERE];
+            fgets(autor, MAX_CARACTERE, stdin);
+            remover = remover_autor(&(aux->livro.listaAutores), autor);
             free(remover);
 
             printf("\t\t--------------------------------------------------- Removido com sucesso! -----------------------------------------------------\n\n");
-            printf("\t\tIdentificador: %d\n", aux->livro.identificador);
+            printf("\t\tIdentificador: %d\n", aux->livro.indetificador);
             printf("\t\tTitulo: %s\n", aux->livro.titulo);
             printf("\t\t");
-            imprimir_autores(&(aux->livro.lista_autores));
+            imprimirAutores(&(aux->livro.listaAutores));
             printf("\t\tAno: %d\n", aux->livro.ano);
             printf("\t\tEdicao: %d\n", aux->livro.edicao);
             printf("\t\tEditora: %s\n",aux->livro.editora);
             printf("\t\t-----------------------------------------------------------------------------------------------------------------------------------\n\n");
-    }
-
-}
-
-void remover_memoria_lista_autores(No_Autor **lista){
-    No_Autor *aux = *lista;
-    while(aux){
-        *lista = (*lista)->proximo;
-        free(aux);
-        aux = *lista;
-    }
-}
-
-void remover_livro(No_Livro **lista){
-
-    imprimir_livros(*lista);
-
-    int identificacao_livro;
-    printf("Qual a identificacao do livro em que vc queira remover: ");
-    scanf("%d", &identificacao_livro);
-    getchar();
-
-    No_Livro *aux = *lista;
-    No_Livro *remover = NULL;
-
-    if(aux->livro.identificador==identificacao_livro){ // conferir se e o primeiro elemento
-        remover = aux;
-        *lista = aux->proximo; // ou remover->proximo
-    }else{ // conferir os elementos adiante
-
-        while (aux->proximo && aux->proximo->livro.identificador != identificacao_livro) // enquanto o proximo nao for NULL e diferente do identificador avance
-        {
-            aux = aux->proximo;
-        }
-
-        if(aux->proximo == NULL){
-            printf("ERRO! Nao existe usuario com este identiicador!\n");
-            return;
-        }else{
-
-            remover = aux->proximo;
-            aux->proximo = remover->proximo; // ou aux->proximo->proximo
-
-            printf("\t\t--------------------------------------------------- Removido com sucesso! -----------------------------------------------------\n\n");
-            printf("\t\tIdentificador: %d\n", remover->livro.identificador);
-            printf("\t\tTitulo: %s\n", remover->livro.titulo);
-            printf("\t\t");
-            imprimir_autores(&(remover->livro.lista_autores));
-            printf("\t\tAno: %d\n", remover->livro.ano);
-            printf("\t\tEdicao: %d\n", remover->livro.edicao);
-            printf("\t\tEditora: %s\n",remover->livro.editora);
-            printf("\t\t-----------------------------------------------------------------------------------------------------------------------------------\n\n");
-
-            
-        }
-        
-    }
-
-    remover_memoria_lista_autores(&(remover->livro.lista_autores));
-    free(remover);
-
-}
-
-void alterar_livro(No_Livro **lista){
-
-    imprimir_livros(*lista);
-
-    int identificador_livro;
-    printf("Digite o identificador do livro que queira alterar: ");
-    scanf("%d", &identificador_livro);
-    getchar();
-
-    /*Buscar usuario*/
-
-    No_Livro *aux = *lista;
-    while(aux && aux->livro.identificador != identificador_livro){ // se aux nao for nulo e for diferente do identificador, vá para o proximo elemenyp
-        aux = aux->proximo;
-    }
-
-    if(aux == NULL){ // se for NULL, significa que nao existe o identificador dentro da lista de usuarios
-        printf("Nao existe este identificador!\n");
-        return;
-    }else{
-        
-            printf("\t\t------------------------------------------------ Livro escolhido para modificar -------------------------------------------------\n\n");
-            printf("\t\tIdentificador: %d\n", aux->livro.identificador);
-            printf("\t\tTitulo: %s\n", aux->livro.titulo);
-            printf("\t\t");
-            imprimir_autores(&(aux->livro.lista_autores));
-            printf("\t\tAno: %d\n", aux->livro.ano);
-            printf("\t\tEdicao: %d\n", aux->livro.edicao);
-            printf("\t\tEditora: %s\n",aux->livro.editora);
-            printf("\t\t-----------------------------------------------------------------------------------------------------------------------------------\n\n");
-    }
-
-    /*Inserir dados para alterar usuario*/
-
-            printf("Insira os dados para alteracao:\n");
-
-            printf("Qual o titulo do livro: ");
-            fgets(aux->livro.titulo, sizeof(aux->livro.titulo), stdin);
-            aux->livro.titulo[strcspn(aux->livro.titulo, "\n")] = '\0'; // Remover o caractere de nova linha
-
-            printf("Qual o ano do livro: ");
-            scanf("%d", &aux->livro.ano);
-
-            printf("Qual a edicao do livro: ");
-            scanf("%d", &aux->livro.edicao);
-
-            getchar();
-
-            printf("Qual a editora do livro: ");
-            fgets(aux->livro.editora, sizeof(aux->livro.editora), stdin);
-            aux->livro.editora[strcspn(aux->livro.editora, "\n")] = '\0'; // Remover o caractere de nova linha
-
-            int quant_autores;
-
-            remover_memoria_lista_autores(&(aux->livro.lista_autores)); // como vamos cadastrar os autores denovo, devemos liberar a lista de autores
-            aux->livro.lista_autores = NULL;
-
-            printf("Quantos autores: ");
-
-            scanf("%d", &quant_autores);
-
-            getchar();
-
-            for(int i = 0; i < quant_autores; i++){
-
-                char autor[100], instituicao[100];
-
-                printf("Autor %d\n", i+1);
-
-                printf("Digite o nome do autor: ");
-                gets(autor);
-
-
-                printf("Digite a instituicao do autor: ");
-                gets(instituicao);
-
-
-                adicionar_autor(&(aux->livro.lista_autores), autor, instituicao); // vai adicionando na lista de autores (lista encadeada)
-
-            }
-
-            printf("\t\t------------------------------------------------ Livro Modificado! -------------------------------------------------\n\n");
-            printf("\t\tIdentificador: %d\n", aux->livro.identificador);
-            printf("\t\tTitulo: %s\n", aux->livro.titulo);
-            printf("\t\t");
-            imprimir_autores(&(aux->livro.lista_autores));
-            printf("\t\tAno: %d\n", aux->livro.ano);
-            printf("\t\tEdicao: %d\n", aux->livro.edicao);
-            printf("\t\tEditora: %s\n",aux->livro.editora);
-            printf("\t\t-----------------------------------------------------------------------------------------------------------------------------------\n\n");
-
-             imprimir_livros(*lista);
-
 }
 
 int main () {
+    noLivro *listaDeLivros = NULL;
+    noUsuario *listaDeUsuarios = NULL;
+    noReserva *listaDeReservas = NULL;
 
-    /* Declarações para inicar a lista, isto é, a lista começarão apontando para NULL, pois ainda nao existe elementos nas listas */
+    int op;
+    bool k = true;
 
-    No_Autor *lista_autores = NULL;
-    No_Usuario *lista_usuarios  = NULL;
-    No_Livro *lista_livros  = NULL;
-    No_Reserva *lista_reservas  = NULL;
-
-    /*
-    
-    adicionar_usuario(&lista_usuarios);
-    adicionar_usuario(&lista_usuarios);
-    remover_usuario(&lista_usuarios);
-    imprimir_usuarios(lista_usuarios);
-
-    alterar_usuario(&lista_usuarios);
-
-    */
-
-    
-
-   adicionar_livro(&lista_livros);
-   adicionar_livro(&lista_livros);
-
- //  adicionar_mais_um_autor_no_livro(&lista_livros);
-
- //  remover_um_autor_no_livro(&lista_livros);
- alterar_livro(&lista_livros);
- remover_livro(&lista_livros);
-   imprimir_livros(lista_livros);
-
-   
-
-   
-
-
+    int opInside;
+    while (k) {
+        printf("\t\t------------------------------- MENU --------------------------------------\n");
+        printf("\t\t| 1- Usuários                                                             |\n");
+        printf("\t\t| 2- Livros                                                               |\n");
+        printf("\t\t| 3- Reserva                                                              |\n");
+        printf("\t\t| 4- Relatórios                                                           |\n");
+        printf("\t\t| 5- Sair                                                                 |\n");
+        printf("\t\t---------------------------------------------------------------------------\n");
+        printf("\n\n");
+        printf("Informe sua opção: ");
+        scanf("%d", &op);
+        switch (op) {
+        case 1 :
+            printf("\t\t------------------------------- Escolha --------------------------------------\n");
+            printf("\t\t| 1- Adicionar Usuário                                                       |\n");
+            printf("\t\t| 2- Alterar Usuário                                                         |\n");
+            printf("\t\t| 3- Excluir Usuário                                                         |\n");
+            printf("\t\t------------------------------------------------------------------------------\n");
+            printf("Qual opção deseja: ");
+            scanf("%d", &opInside);
+            getchar();
+            if (opInside == 1) {
+                adicionarUsuario(&listaDeUsuarios);
+            }
+            if (opInside == 2) {
+                alteraUsuario(&listaDeUsuarios);
+            }
+            if (opInside == 3) {
+                excluirUsuario(&listaDeUsuarios);
+            }
+            continue;
+        case 2:
+            printf("\t\t------------------------------- Escolha --------------------------------------\n");
+            printf("\t\t| 1- Adicionar Livro                                                         |\n");
+            printf("\t\t| 2- Alterar Livro                                                           |\n");
+            printf("\t\t| 3- Incluir Autor                                                           |\n");
+            printf("\t\t| 4- Exlcuir Autor                                                           |\n");
+            printf("\t\t| 5- Excluir Livro                                                           |\n");
+            printf("\t\t------------------------------------------------------------------------------\n");
+            printf("Qual opção deseja: ");
+            scanf("%d", &opInside);
+            getchar();
+            if (opInside == 1) {
+                adicionarLivro(&listaDeLivros);
+            }
+            if (opInside == 2) {
+                alterarLivro(&listaDeLivros);
+            }
+            if (opInside == 3) {
+                incluirAutor(&listaDeLivros);
+            }
+            // if (opInside == 4) {
+            //     excluirAutor(&listaDeLivros);
+            // }
+            if(opInside == 5) {
+                excluirLivro(&listaDeLivros);
+            }
+            continue;
+        case 3:
+            printf("\t\t------------------------------- Escolha --------------------------------------\n");
+            printf("\t\t| 1- Adicionar Reserva                                                       |\n");
+            printf("\t\t| 2- Alterar Reserva                                                         |\n");
+            printf("\t\t| 3- Excluir Reserva                                                         |\n");
+            printf("\t\t------------------------------------------------------------------------------\n");
+            printf("Qual opção deseja: ");
+            scanf("%d", &opInside);
+            getchar();
+            if (opInside == 1) {
+                adicionarReserva(&listaDeReservas, &listaDeLivros, &listaDeUsuarios);
+            }
+            if (opInside == 2) {
+                alterarReserva(&listaDeReservas);
+            }
+            if (opInside == 3) {
+                excluirReserva(&listaDeReservas);
+            }
+            continue;
+        case 4:
+            printf("\t\t------------------------------- Escolha --------------------------------------\n");
+            printf("\t\t| 1- Listar Livro                                                            |\n");
+            printf("\t\t| 2- Listar Usuário                                                          |\n");
+            printf("\t\t| 3- Listar Usuários com Reserva                                             |\n");
+            printf("\t\t------------------------------------------------------------------------------\n");
+            printf("Qual opção deseja: ");
+            scanf("%d", &opInside);
+            getchar();
+            if (opInside == 1) {
+                imprimirLivros(listaDeLivros);
+            }
+            if (opInside == 2) {
+                imprimirUsuarios(listaDeUsuarios);
+            }
+            // if (opInside == 3) {
+            //     usuarioComReserva(&listaDeUsuarios, &listaReserva);
+            // }
+            continue;   
+        case 5:
+            k = false;  
+            break;
+        }
+    }
 
     return 0;
 }
- /*
- 
- !!!!!!!!!!!!A FAZER: adicionar reserva, alterar reserva, remover resevar. Atentar que, nao e obrigatorio, mas poder fazer uma
- função que quando deleta um usuario ou livro, a reserva que esteja com o elemento deletado tambem seja deletado! E tambem fazer uma função para liberar memoria de todas as listas*/
