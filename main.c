@@ -61,7 +61,7 @@ typedef struct no_Reserva{
 void imprimirAutores (noAutor **listaAutores) {
     noAutor *aux = *listaAutores;
     if (*listaAutores == NULL) {
-        printf("A lista de autores está vazia!\n");
+        printf("\t\tA lista de autores está vazia!\n");
         return ;
     } else {
         printf("\t\tAutores: ");
@@ -125,12 +125,12 @@ void imprimirUsuarios (noUsuario *listaUsuario) {
 void imprimirReservas (noReserva *listaReservas) {
     noReserva *aux = listaReservas;
 
-    printf("\t\t---------------------------------------------------- Reservas Cadastrados -----------------------------------------------------\n\n");
+    printf("\t\t---------------------------------------------------- Reservas Cadastrados ------------------------------------\n\n");
     int i = 0;
 
     while (aux) {
         i++;
-        printf("\t\t Reserva %d (Data Início: %15s | Data do Fim: %15s | ID do usuário: %5d | ID do livro: %5d)", i, aux->reserva.dataInicio, aux->reserva.dataFim, aux->reserva.identificadorUsuario, aux->reserva.identificadorLivro);
+        printf("\t\t Reserva %d (Data Início: %15s | Data do Fim: %15s | ID do usuário: %5d | ID do livro: %5d)\n", i, aux->reserva.dataInicio, aux->reserva.dataFim, aux->reserva.identificadorUsuario, aux->reserva.identificadorLivro);
         aux = aux->proximo;
     }
 
@@ -182,7 +182,7 @@ void removeMemoriaListaAutores (noAutor **listaAutores) {
 
 void adicionarLivro(noLivro **listaLivro) {
     // Pede o indentificador ao user para verificar se já existe algum livro com aquele identificador
-    if (controleLivro < 1) {
+    if (controleLivro < 20) {
         noLivro *novoLivro = malloc(sizeof(noLivro)), *aux;
 
         if (novoLivro) {
@@ -268,7 +268,7 @@ void adicionarLivro(noLivro **listaLivro) {
 }
 
 void adicionarUsuario(noUsuario **listaUsuario) {
-    if (controleUsuario < 1) {
+    if (controleUsuario < 10) {
         noUsuario *novoUsuario = malloc(sizeof(noUsuario)), *aux;
 
         if (novoUsuario) {
@@ -311,12 +311,35 @@ void adicionarUsuario(noUsuario **listaUsuario) {
     }
 }
 
+int verificar_colisoes_livros(noReserva **listaReserva, int idLiv){
+    if(*listaReserva != NULL){
+        noReserva *aux = *listaReserva;
+        int indetificador = 1;
+
+        while(aux){
+
+            if(aux->reserva.identificadorLivro == idLiv){
+
+                indetificador = 0;
+
+            }
+
+            aux = aux->proximo;
+        }
+
+        return indetificador;
+
+    }else{
+        return 1;
+    }
+}
+
 void adicionarReserva(noReserva **listaReserva, noLivro **listaLivros, noUsuario **listaUsuario) {
     if (*listaLivros == NULL || *listaUsuario == NULL) {
         printf("\t\tNão é possível realizar reservas sem livros ou autores no arcevo\n");
         return ;
     }
-    if (controleReserva < 1) {
+    if (controleReserva < 20) {
         noReserva *novaReserva = malloc(sizeof(noReserva)), *aux;
 
         if (novaReserva) {
@@ -359,6 +382,11 @@ void adicionarReserva(noReserva **listaReserva, noLivro **listaLivros, noUsuario
                 return ;
             }
 
+            if(!verificar_colisoes_livros(listaReserva, novaReserva->reserva.identificadorLivro)){
+                printf("\n\t\tJá se foi cadastro este livro!\n\n");
+                return;
+            }
+
             printf("Informe a data de entrega (dd/mm/aa): ");
             fgets(novaReserva->reserva.dataFim, MAX_DATA, stdin);
             novaReserva->reserva.dataFim[strcspn(novaReserva->reserva.dataFim, "\n")] = '\0';
@@ -394,7 +422,67 @@ void removerAutores(noAutor **listaAutores) {
     }
 }
 
-void excluirLivro(noLivro **listaLivro) {
+void excluirReserva_no_excluirUsuario(noReserva **listaReserva, int idUser) {
+    noReserva *aux = *listaReserva, *remover = NULL;
+
+   
+        if (aux->reserva.identificadorUsuario == idUser) {
+            remover = aux;
+            *listaReserva = aux->proximo;
+            printf("\n\t\t------------------------------------------- Removido reserva do usuario deletado! ---------------------------------------------\n\n");
+            printf("\t\t(Data início: %s | Data fim: %s | ID usuário: %d | ID livro: %d\n\n)", remover->reserva.dataInicio, remover->reserva.dataFim, remover->reserva.identificadorUsuario, remover->reserva.identificadorUsuario);
+            printf("\t\t---------------------------------------------------------------------------------------------------------------------------------\n\n");
+        } else {
+            while (aux->proximo && aux->proximo->reserva.identificadorUsuario != idUser) {
+                aux = aux->proximo;
+            }
+            if (aux->proximo == NULL) {
+                printf("\t\tID do livro ou do Usuário não encontrado\n");
+                return ;
+            } else {
+                remover = aux->proximo;
+                aux->proximo = remover->proximo;
+                printf("\n\t\t------------------------------------------- Removido reserva do usuario deletado! ----------------------------------------------\n\n");
+                printf("\t\t (Data início: %s | Data fim: %s | ID usuário: %d | ID livro: %d\n\n)", remover->reserva.dataInicio, remover->reserva.dataFim, remover->reserva.identificadorUsuario, remover->reserva.identificadorUsuario);
+                printf("\t\t----------------------------------------------------------------------------------------------------------------------------------\n\n");
+            }
+        }
+        controleReserva--;
+        free(remover);
+    
+}
+
+void excluirReserva_no_excluirLivro(noReserva **listaReserva, int idLiv) {
+    noReserva *aux = *listaReserva, *remover = NULL;
+
+   
+        if (aux->reserva.identificadorLivro == idLiv) {
+            remover = aux;
+            *listaReserva = aux->proximo;
+            printf("\n\t\t------------------------------------------- Removido reserva do livro deletado! ---------------------------------------------\n\n");
+            printf("\t\t(Data início: %s | Data fim: %s | ID usuário: %d | ID livro: %d\n\n)", remover->reserva.dataInicio, remover->reserva.dataFim, remover->reserva.identificadorUsuario, remover->reserva.identificadorUsuario);
+            printf("\t\t-------------------------------------------------------------------------------------------------------------------------------\n\n");
+        } else {
+            while (aux->proximo && aux->proximo->reserva.identificadorLivro != idLiv) {
+                aux = aux->proximo;
+            }
+            if (aux->proximo == NULL) {
+                printf("\t\tID do livro ou do Usuário não encontrado\n");
+                return ;
+            } else {
+                remover = aux->proximo;
+                aux->proximo = remover->proximo;
+                printf("\n\t\t------------------------------------------- Removido reserva do livro deletado! ----------------------------------------------\n\n");
+                printf("\t\t (Data início: %s | Data fim: %s | ID usuário: %d | ID livro: %d\n\n)", remover->reserva.dataInicio, remover->reserva.dataFim, remover->reserva.identificadorUsuario, remover->reserva.identificadorUsuario);
+                printf("\t\t--------------------------------------------------------------------------------------------------------------------------------\n\n");
+            }
+        }
+        controleReserva--;
+        free(remover);
+    
+}
+
+void excluirLivro(noLivro **listaLivro, noReserva **listaReserva) {
     if (*listaLivro == NULL) {
         printf("\n \t\tA lista de livros está vazia\n\n");
         return ;
@@ -412,11 +500,21 @@ void excluirLivro(noLivro **listaLivro) {
     if (aux->livro.indetificador == identificacao) {
         remover = aux;
         *listaLivro = aux->proximo;
+
+            printf("\t\t--------------------------------------------------- Removido com sucesso! -----------------------------------------------------\n\n");
+            printf("\t\tIdentificador: %ld\n", remover->livro.indetificador);
+            printf("\t\tTítulo: %s\n", remover->livro.titulo);
+            imprimirAutores(&(remover->livro.listaAutores));
+            printf("\t\tAno: %d\n", remover->livro.ano);
+            printf("\t\tEdição: %d\n", remover->livro.edicao);
+            printf("\t\tEditora: %s\n", remover->livro.editora);
+            printf("\t\t-------------------------------------------------------------------------------------------------------------------------------\n\n");
+
     } else {
-        while (aux->proximo && aux->livro.indetificador != identificacao) {
+        while (aux->proximo && aux->proximo->livro.indetificador != identificacao) {
             aux = aux->proximo;
         }
-        if (aux == NULL) {
+        if (aux->proximo == NULL) {
             printf("\t\tID de usuário não encontrado\n");
             return ;
         } else {
@@ -426,21 +524,22 @@ void excluirLivro(noLivro **listaLivro) {
             printf("\t\t--------------------------------------------------- Removido com sucesso! -----------------------------------------------------\n\n");
             printf("\t\tIdentificador: %ld\n", remover->livro.indetificador);
             printf("\t\tTítulo: %s\n", remover->livro.titulo);
-            printf("\t\t");
             imprimirAutores(&(remover->livro.listaAutores));
             printf("\t\tAno: %d\n", remover->livro.ano);
             printf("\t\tEdição: %d\n", remover->livro.edicao);
             printf("\t\tEditora: %s\n", remover->livro.editora);
-            printf("\t\t--------------------------------------------------- Removido com sucesso! -----------------------------------------------------\n\n");
+            printf("\t\t-------------------------------------------------------------------------------------------------------------------------------\n\n");
 
         }
     }
+    
     removerAutores(&(remover->livro.listaAutores));
     controleLivro--;
+    excluirReserva_no_excluirLivro(listaReserva, remover->livro.indetificador);
     free(remover);
 }
 
-void excluirUsuario(noUsuario **listaUsuarios) {
+void excluirUsuario(noUsuario **listaUsuarios, noReserva **listaReservas) {
     if (*listaUsuarios == NULL) {
         printf("\n\t\tNão há usuários cadastrados\n\n");
         return ;
@@ -456,11 +555,17 @@ void excluirUsuario(noUsuario **listaUsuarios) {
     if (aux->usuario.indetificador == identificacao) {
         remover = aux;
         *listaUsuarios = aux->proximo;
+
+        printf("\t\t--------------------------------------------------- Removido com sucesso! -----------------------------------------------------\n\n");
+        printf("\t\t (Nome: %15s | Endereço: %30s | Telefone: %11ld | Identificador: %5ld)\n\n", remover->usuario.nome, remover->usuario.endereco, remover->usuario.telefone, remover->usuario.indetificador);
+        printf("\t\t-----------------------------------------------------------------------------------------------------------------------------------\n\n");
+
+
     } else {
-        while (aux->proximo && aux->usuario.indetificador != identificacao) {
+        while (aux->proximo && aux->proximo->usuario.indetificador != identificacao) {
             aux = aux->proximo;
         }
-        if (aux == NULL) {
+        if (aux->proximo == NULL) {
             printf("\t\tID de usuário não encontrado\n");
             return ;
         } else {
@@ -472,6 +577,7 @@ void excluirUsuario(noUsuario **listaUsuarios) {
         }
     }
     controleUsuario--;
+    excluirReserva_no_excluirUsuario(listaReservas, remover->usuario.indetificador);
     free(remover);
 }
 
@@ -498,12 +604,12 @@ void excluirReserva(noReserva **listaReserva) {
             *listaReserva = aux->proximo;
             printf("\t\t--------------------------------------------------- Removido com sucesso! -----------------------------------------------------\n\n");
             printf("\t\t(Data início: %s | Data fim: %s | ID usuário: %d | ID livro: %d\n\n)", remover->reserva.dataInicio, remover->reserva.dataFim, remover->reserva.identificadorUsuario, remover->reserva.identificadorUsuario);
-            printf("\t\t--------------------------------------------------- Removido com sucesso! -----------------------------------------------------\n\n");
+            printf("\t\t-------------------------------------------------------------------------------------------------------------------------------\n\n");
         } else {
-            while (aux->proximo && aux->reserva.identificadorUsuario != idUser && aux->reserva.identificadorLivro != idLivro) {
+            while (aux->proximo && aux->proximo->reserva.identificadorUsuario != idUser && aux->proximo->reserva.identificadorLivro != idLivro) {
                 aux = aux->proximo;
             }
-            if (aux == NULL) {
+            if (aux->proximo == NULL) {
                 printf("\t\tID do livro ou do Usuário não encontrado\n");
                 return ;
             } else {
@@ -511,7 +617,7 @@ void excluirReserva(noReserva **listaReserva) {
                 aux->proximo = remover->proximo;
                 printf("\t\t--------------------------------------------------- Removido com sucesso! -----------------------------------------------------\n\n");
                 printf("\t\t (Data início: %s | Data fim: %s | ID usuário: %d | ID livro: %d\n\n)", remover->reserva.dataInicio, remover->reserva.dataFim, remover->reserva.identificadorUsuario, remover->reserva.identificadorUsuario);
-                printf("\t\t--------------------------------------------------- Removido com sucesso! -----------------------------------------------------\n\n");
+                printf("\t\t-------------------------------------------------------------------------------------------------------------------------------\n\n");
             }
         }
         controleReserva--;
@@ -711,7 +817,7 @@ void incluirAutor (noLivro **listaLivro) {
     }
 
      printf("\t\t------------------------------------------- Livro com autor que sera adicionado --------------------------------------------------\n\n");
-            printf("\t\tIdentificador: %d\n", aux->livro.indetificador);
+            printf("\t\tIdentificador: %ld\n", aux->livro.indetificador);
             printf("\t\tTitulo: %s\n", aux->livro.titulo);
             imprimirAutores(&(aux->livro.listaAutores));
             printf("\t\tAno: %d\n", aux->livro.ano);
@@ -728,7 +834,7 @@ void incluirAutor (noLivro **listaLivro) {
             adicionarAutor(&(aux->livro.listaAutores), autor, instituicao);
 
             printf("\t\t--------------------------------------------------- Adicionado com sucesso! -----------------------------------------------------\n\n");
-            printf("\t\tIdentificador: %d\n", aux->livro.indetificador);
+            printf("\t\tIdentificador: %ld\n", aux->livro.indetificador);
             printf("\t\tTitulo: %s\n", aux->livro.titulo);
             imprimirAutores(&(aux->livro.listaAutores));
             printf("\t\tAno: %d\n", aux->livro.ano);
@@ -785,7 +891,7 @@ void excluirAutor (noLivro **listaLivro) {
     getchar();
 
     noLivro *aux = *listaLivro;
-    noAutor *remover;
+    noAutor *remover = NULL;
 
     while (aux && aux->livro.indetificador != indentificarLivro) {
         aux = aux->proximo;
@@ -793,11 +899,11 @@ void excluirAutor (noLivro **listaLivro) {
 
     if (aux == NULL) {
         printf("\n \t\t Identificador não encontrado! \n\n");
-        return ;
+        return;
     }
 
     printf("\t\t------------------------------------------- Livro com autor que sera removido --------------------------------------------------\n\n");
-            printf("\t\tIdentificador: %d\n", aux->livro.indetificador);
+            printf("\t\tIdentificador: %ld\n", aux->livro.indetificador);
             printf("\t\tTitulo: %s\n", aux->livro.titulo);
             printf("\t\t");
             imprimirAutores(&(aux->livro.listaAutores));
@@ -810,11 +916,12 @@ void excluirAutor (noLivro **listaLivro) {
             printf("Digite o nome do autor que queira deletar: ");
             char autor[MAX_CARACTERE];
             fgets(autor, MAX_CARACTERE, stdin);
+            autor[strcspn(autor, "\n")] = '\0';
             remover = remover_autor(&(aux->livro.listaAutores), autor);
             free(remover);
 
             printf("\t\t--------------------------------------------------- Removido com sucesso! -----------------------------------------------------\n\n");
-            printf("\t\tIdentificador: %d\n", aux->livro.indetificador);
+            printf("\t\tIdentificador: %ld\n", aux->livro.indetificador);
             printf("\t\tTitulo: %s\n", aux->livro.titulo);
             printf("\t\t");
             imprimirAutores(&(aux->livro.listaAutores));
@@ -823,6 +930,7 @@ void excluirAutor (noLivro **listaLivro) {
             printf("\t\tEditora: %s\n",aux->livro.editora);
             printf("\t\t-----------------------------------------------------------------------------------------------------------------------------------\n\n");
 }
+
 
 int main () {
     noLivro *listaDeLivros = NULL;
@@ -861,7 +969,7 @@ int main () {
                 alteraUsuario(&listaDeUsuarios);
             }
             if (opInside == 3) {
-                excluirUsuario(&listaDeUsuarios);
+                excluirUsuario(&listaDeUsuarios, &listaDeReservas);
             }
             continue;
         case 2:
@@ -884,11 +992,11 @@ int main () {
             if (opInside == 3) {
                 incluirAutor(&listaDeLivros);
             }
-            // if (opInside == 4) {
-            //     excluirAutor(&listaDeLivros);
-            // }
+            if (opInside == 4) {
+                excluirAutor(&listaDeLivros);
+            }
             if(opInside == 5) {
-                excluirLivro(&listaDeLivros);
+                excluirLivro(&listaDeLivros, &listaDeReservas);
             }
             continue;
         case 3:
@@ -925,9 +1033,9 @@ int main () {
             if (opInside == 2) {
                 imprimirUsuarios(listaDeUsuarios);
             }
-            // if (opInside == 3) {
-            //     usuarioComReserva(&listaDeUsuarios, &listaReserva);
-            // }
+            if (opInside == 3) {
+                imprimirReservas(listaDeReservas);
+            }
             continue;   
         case 5:
             k = false;  
@@ -937,3 +1045,4 @@ int main () {
 
     return 0;
 }
+
