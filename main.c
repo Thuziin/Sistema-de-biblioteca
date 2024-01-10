@@ -3,22 +3,14 @@
 #include <string.h>
 #include <stdbool.h>
 
+#include "autor.h"
+
 #define MAX_CARACTERE 100
 #define MAX_DATA 11
 
 int controleLivro = 0;
 int controleUsuario = 0;
 int controleReserva = 0;
-
-typedef struct {
-    char nome[MAX_CARACTERE];
-    char instituicao[MAX_CARACTERE];
-} Autor;
-
-typedef struct no_Autor{
-    Autor autor;
-    struct no_Autor* proximo;
-} noAutor;
 
 typedef struct {
     long int indetificador;
@@ -58,23 +50,6 @@ typedef struct no_Reserva{
     struct no_Reserva* proximo;
 } noReserva;
 
-void imprimirAutores (noAutor **listaAutores) {
-    noAutor *aux = *listaAutores;
-    if (*listaAutores == NULL) {
-        printf("\t\tA lista de autores está vazia!\n");
-        return ;
-    } else {
-        printf("\t\tAutores: ");
-        while (aux) {
-            printf("%s", aux->autor.nome);
-            if (aux->proximo) {
-                printf(", ");
-            }
-            aux = aux->proximo;
-        }
-    }
-    printf("\n");
-}
 
 void imprimirLivros(noLivro *listaLivro) {
     if (listaLivro == NULL) {
