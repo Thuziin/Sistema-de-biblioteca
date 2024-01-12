@@ -2,7 +2,6 @@
 #define AUTOR_H
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 typedef struct {
@@ -15,6 +14,16 @@ typedef struct noAutor {
     struct noAutor* proximo;
 } noAutor;
 
-void imprimirAutores (noAutor **listaAutores);
+void imprimirAutores(noAutor **listaAutores);
+
+void adicionarAutor(noAutor **listaAutor, char nome[], char instituicao[]);
+
+void removerAutores(noAutor **listaAutores);
+
+// void incluirAutor(noLivro **listaLivro);
+
+noAutor *remover_autor(noAutor **lista, char nome[]);
+
+// void excluirAutor(noLivro **listaLivro);
 
 #endif
