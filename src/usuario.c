@@ -1,4 +1,4 @@
-#include "usuario.h"
+#include "../include/usuario.h"
 
 void imprimirUsuarios(noUsuario *listaUsuario) {
     if (listaUsuario == NULL) {

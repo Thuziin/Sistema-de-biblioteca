@@ -1,4 +1,4 @@
-#include "reserva.h"
+#include "../include/reserva.h"
 
 void imprimirReserva(noReserva *listaReserva) {
     if (listaReserva == NULL) {

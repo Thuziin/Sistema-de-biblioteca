@@ -1,4 +1,4 @@
-#include "autor.h"
+#include "../include/autor.h"
 #include <stdlib.h>
 
 void imprimirAutores (noAutor **listaAutores) {

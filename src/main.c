@@ -3,10 +3,10 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "autor.h"
-#include "livro.h"
-#include "usuario.h"
-#include "reserva.h"
+#include "../include/autor.h"
+#include "../include/livro.h"
+#include "../include/usuario.h"
+#include "../include/reserva.h"
 
 
 int main () {
